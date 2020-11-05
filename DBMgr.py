@@ -21,6 +21,7 @@ class DBMgr(object):
 		self.config_col.replace_one({"_id":key},{"value":value},True)
 
 	def _ReadConfigs(self):
+		print("Setting up configs...")
 		self.ROOM_DEFINITION=self._GetConfigValue("ROOM_DEFINITION")
 		self.APPLIANCE_DEFINITION=self._GetConfigValue("APPLIANCE_DEFINITION")
 		self.SAMPLING_TIMEOUT_SHORTEST=self._GetConfigValue("SAMPLING_TIMEOUT_SHORTEST")
@@ -124,6 +125,12 @@ class DBMgr(object):
 		return MongoJsonEncoder().encode(data)
 	def __init__(self, start_bg_thread=True):
 		self.dbc=pymongo.MongoClient()
+
+		self.config_col=self.dbc.db.config
+		self.snapshots_col_rooms=self.dbc.db.snapshots_col_rooms
+		self.snapshots_col_appliances=self.dbc.db.snapshots_col_appliances
+		self.snapshots_col_users=self.dbc.db.snapshots_col_users
+
 		self._ReadConfigs()
 		## Data Structure Init: bipartite graph between rooms and appls
 		## TODO: Add a web interface to update config in db, and pull new config into memory.
@@ -135,7 +142,6 @@ class DBMgr(object):
 		## Read appliance values from database; TODO: occupants location
 		self._HardcodeValues()
 		# self.watchdogInit()
-
 
 		if start_bg_thread:
 			self.startDaemon()

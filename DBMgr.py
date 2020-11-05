@@ -137,7 +137,7 @@ class DBMgr(object):
 
 		self._ConstructInMemoryGraph()
 		## Construct bipartite graph.
-		self._accumulator()
+		# self._accumulator()
 		self._GracefulReloadGraph()
 		## Read appliance values from database; TODO: occupants location
 		self._HardcodeValues()

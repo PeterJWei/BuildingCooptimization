@@ -9,6 +9,16 @@ import copy
 from threading import Thread
 import sys
 
+def add_log(msg,obj):
+	print("Got log:"+msg)
+	print(obj)
+	traceback.print_exc()
+	pymongo.MongoClient().log_db.log.insert({
+		"msg":msg,
+		"obj":obj,
+		"timestamp":datetime.datetime.utcnow()
+		});
+
 class DBMgr(object):
 	def _GetConfigValue(self,key):
 		try:

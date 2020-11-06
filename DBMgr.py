@@ -8,6 +8,8 @@ import pprint
 import copy
 from threading import Thread
 import sys
+from watchdog import Watchdog
+from Email import SendEmail
 
 def add_log(msg,obj):
 	print("Got log:"+msg)
@@ -142,6 +144,9 @@ class DBMgr(object):
 		self.snapshots_col_users=self.dbc.db.snapshots_col_users
 
 		self._ReadConfigs()
+		self.watchdog = watchdog.Watchdog(
+			self.WATCHDOG_TIMEOUT_USER,
+			self.WATCHDOG_TIMEOUT_APPLIANCE)
 		## Data Structure Init: bipartite graph between rooms and appls
 		## TODO: Add a web interface to update config in db, and pull new config into memory.
 
@@ -151,6 +156,7 @@ class DBMgr(object):
 		self._GracefulReloadGraph()
 		## Read appliance values from database; TODO: occupants location
 		self._HardcodeValues()
+
 		# self.watchdogInit()
 
 		if start_bg_thread:
@@ -179,8 +185,8 @@ class DBMgr(object):
 		while True:
 			time.sleep(self.SAMPLING_TIMEOUT_LONGEST)
 			self.SaveShot()
-			# self.watchdogCheck_User()
-			# self.watchdogCheck_Appliance()
+			self.watchdogCheckUser()
+			self.watchdogCheckAppliance()
 
 	def _getShotRooms(self, concise=True):
 		return self.list_of_rooms
@@ -202,7 +208,7 @@ class DBMgr(object):
 				add_log("fail to trace person's consumption; id:",user_id)
 
 		return personal_consumption
-		
+
 	def updateApplianceValue(self, applianceID, value):
 		self.list_of_appliances[applianceID]["value"]=int(float(value))
 
@@ -221,6 +227,121 @@ class DBMgr(object):
 			ret["consumptions"]+=[app]
 		ret["value"]=total_con
 		return ret
+
+	def ReportEnergyValue(self, applianceID, value, raw_data=None):
+		"maintenance tree node's energy consumption item, and update a sum value"
+		known_room=None
+		try:
+			if (applianceID not in self.list_of_appliances):
+				print("applianceID " + applianceID + " not in list of appliances.")
+				return
+			app=self.list_of_appliances[applianceID]
+			known_room=app["rooms"]
+			if value<0:
+				add_log("Negative value found on energy report?",{
+					"deviceID":applianceID,
+					"value":value,
+					"raw":raw_data
+					})
+				return
+			self.updateApplianceValue(app["id"], value)
+
+		except:
+			add_log("failed to report energy value on device",{
+				"known_room":known_room,
+				"deviceID":applianceID,
+				"value":value,
+				"raw":raw_data
+				})
+			return
+
+		self.LogRawData({
+			"type":"energy_report",
+			"roomID":known_room,
+			"applianceID":applianceID,
+			"value":value,
+			"raw":raw_data
+			})
+		self.watchdogRefresh_Appliance(applianceID)
+
+	def updateUserLocation(self, user_id, in_id=None, out_id=None):
+		self.location_of_users[user_id]=in_id
+		if in_id==out_id:
+			return
+		## TODO: optimize, merge In-ops and Out-ops and remove unnecessary update to common appliances
+		if in_id!=None and self.list_of_rooms[in_id]!=None:
+			self.list_of_rooms[in_id]["users"]+=[user_id]
+			for applianceID in self.list_of_rooms[in_id]["appliances"]:
+				self.list_of_appliances[applianceID]["total_users"]+=1
+		if out_id!=None and self.list_of_rooms[out_id]!=None:
+			if (user_id in self.list_of_rooms[out_id]["users"]):
+				self.list_of_rooms[out_id]["users"].remove(user_id)
+				for applianceID in self.list_of_rooms[out_id]["appliances"]:
+					self.list_of_appliances[applianceID]["total_users"]-=1
+
+	def LogRawData(self,obj):
+		obj["_log_timestamp"]=datetime.datetime.utcnow()
+		self.raw_data.insert(obj)
+
+	def watchdogCheckUser(self):
+		outOfRange_List=[]
+		minTime=self._now()-self.watchdog.WATCHDOG_TIMEOUT_USER
+
+		for userID in self.watchdog.watchdogLastSeen_User:
+			if self.watchdog.watchdogLastSeen_User[userID]<minTime:
+				outOfRange_List+=[userID]
+				if userID in location_of_users:
+					oldS=location_of_users[userID]
+					self.updateUserLocation(userID, "outOfLab", oldS)
+		for userID in self.location_of_users:
+			if userID not in self.watchdog.watchdogLastSeen_User:
+				oldS=self.location_of_users[userID]
+				self.updateUserLocation(userID, "outOfLab", oldS)
+
+		self.LogRawData({
+			"type":"watchdogCheck_User",
+			"time":self._now(),
+			"minTime":minTime,
+			"outOfRange_List":outOfRange_List,
+			"raw":self.watchdog.watchdogLastSeen_User,
+			})
+		for userID in outOfRange_List:
+			if (userID in self.watchdog.watchdogLastSeen_User):
+				last_seen=self.watchdog.watchdogLastSeen_User[userID]
+			else:
+				last_seen=None
+			#self.ReportLocationAssociation(userID, "outOfLab", {"Note":"Reported by Watchdog","last_seen": last_seen})
+
+	def watchdogCheckAppliance(self):
+		notWorking_List=[]
+		minTime=self._now()-self.watchdog.WATCHDOG_TIMEOUT_APPLIANCE
+		futureTime=self._now()+86400
+		
+		#for applID in self.watchdogLastSeen_Appliance:
+		for applID in self.list_of_appliances:
+			if self.list_of_appliances[applID]["value"]>0:
+				# for all working(value>0) appliances
+				if applID in self.watchdog.watchdogLastSeen_Appliance:
+					if self.watchdog.watchdogLastSeen_Appliance[applID]<minTime:
+						notWorking_List+=[applID]
+				else:
+					#start-up issue, maybe the first report haven't arrived yet.
+					self.watchdog.watchdogLastSeen_Appliance[applID]=self._now()
+
+		for applID in notWorking_List:
+			last_seen=self.watchdog.watchdogLastSeen_Appliance[applID]
+			self.watchdog.watchdogLastSeen_Appliance[applID]=futureTime
+			self.ReportEnergyValue(applID, 0, {"Note":"Reported by Watchdog","last_seen": last_seen})
+
+		title="Energy Monitoring Appliance Down: "+str(notWorking_List)
+		body="Dear SysAdmin,\nThe following appliance ID has not been reporting to the system for >15 minutes."
+		body+="\n\n"+"\n".join([str(x) for x in notWorking_List])+"\n\n"
+		body+="Please debug as appropriate.\nNote: this warning will repeat every 24 hours."
+		body+="\n\nSincerely, system watchdog."
+
+		if len(notWorking_List)>0:
+			email_ret=SendEmail(title, body)
+
 	def SaveShot(self, any_additional_data=None):
 		#save into database, with: timestamp, additional data
 		# self.accumulate()

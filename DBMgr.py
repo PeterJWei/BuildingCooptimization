@@ -144,7 +144,7 @@ class DBMgr(object):
 		self.snapshots_col_users=self.dbc.db.snapshots_col_users
 
 		self._ReadConfigs()
-		self.watchdog = watchdog.Watchdog(
+		self.watchdog = Watchdog(
 			self.WATCHDOG_TIMEOUT_USER,
 			self.WATCHDOG_TIMEOUT_APPLIANCE)
 		## Data Structure Init: bipartite graph between rooms and appls

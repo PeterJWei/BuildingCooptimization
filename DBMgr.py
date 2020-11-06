@@ -343,6 +343,12 @@ class DBMgr(object):
 		if len(notWorking_List)>0:
 			email_ret=SendEmail(title, body)
 
+	def SaveParameters(self, parameters):
+		self.snapshots_parameters.insert({
+			"timestamp":datetime.datetime.utcnow(),
+			"data":parameters
+			})
+
 	def SaveShot(self, any_additional_data=None):
 		#save into database, with: timestamp, additional data
 		# self.accumulate()

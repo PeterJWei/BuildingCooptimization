@@ -263,7 +263,7 @@ class DBMgr(object):
 			"value":value,
 			"raw":raw_data
 			})
-		self.watchdogRefresh_Appliance(applianceID)
+		self.watchdog.watchdogRefresh_Appliance(applianceID)
 
 	def updateUserLocation(self, user_id, in_id=None, out_id=None):
 		self.location_of_users[user_id]=in_id

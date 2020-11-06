@@ -3,11 +3,12 @@ import os
 import datetime
 import time
 import calendar
-
+import BACNet
 import DBMgr
 db=DBMgr.DBMgr()
 
 urls = (
+	"/api/EnergyHVAC", BACNet.EnergyReportBACNET,
 	'/', 'index'
 )
 
@@ -30,4 +31,4 @@ def notfound():
 def run():
     app = MyApplication(urls, globals())
     app.notfound = notfound
-    app.run(port=8090)
+    app.run(port=8000)

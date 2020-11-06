@@ -202,6 +202,10 @@ class DBMgr(object):
 				add_log("fail to trace person's consumption; id:",user_id)
 
 		return personal_consumption
+		
+	def updateApplianceValue(self, applianceID, value):
+		self.list_of_appliances[applianceID]["value"]=int(float(value))
+
 	def calculateRoomFootprint(self, roomID):
 		app_list=self.list_of_rooms[roomID]["appliances"]
 		ret={

@@ -139,6 +139,7 @@ class DBMgr(object):
 		self.dbc=pymongo.MongoClient()
 
 		self.config_col=self.dbc.db.config
+		self.raw_data=self.dbc.db.raw_data
 		self.snapshots_col_rooms=self.dbc.db.snapshots_col_rooms
 		self.snapshots_col_appliances=self.dbc.db.snapshots_col_appliances
 		self.snapshots_col_users=self.dbc.db.snapshots_col_users

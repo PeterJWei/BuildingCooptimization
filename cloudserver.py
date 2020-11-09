@@ -12,6 +12,8 @@ db=DBMgr.DBMgr()
 urls = (
 	"/api/EnergyHVAC", BACNet.EnergyReportBACNET,
 	"/api/EnergyReport", Energy.EnergyReport,
+	"/realtime/(.*)","Realtime",
+    "/realtime","Realtime",
 	'/', 'index'
 )
 

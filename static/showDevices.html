@@ -1,0 +1,58 @@
+<!doctype>
+<html>
+<head>
+<title> Personal Energy Footprint debug frontend -- Appliances </title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/zepto/1.1.6/zepto.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/zepto/1.1.6/modules/fx.min.js"></script>
+<script type="text/javascript">
+$(function(){
+	$('#reload').click(function(){
+		$.get('/realtime/',
+		{},
+		function(payload){
+			console.log('Received data',payload);
+			if(!payload.appliances){alert('error!');}
+			var data=[];
+
+			//for(var id in payload.appliances){}
+			Object.keys(payload.appliances).sort().map(function(id){
+				data.push({
+					id:id,
+					name:payload.appliances[id].name,
+					value:payload.appliances[id].value
+				});
+			});
+			
+			var html=data.map(function(item){
+				return '<li> <b>%name</b> <i>%id</i><br> %value Watts </li>'
+					.replace('%name',item.name)
+					.replace('%value',item.value)	
+					.replace('%id',item.id);
+			}).join('');
+			$('#list').html(html);
+		},
+		'json');
+	}).click();
+});
+</script>
+<style type="text/css">
+ul li {
+	margin-bottom: 4px;
+}
+ul li:nth-child(odd) {
+   background-color: #ccc;
+}
+ul li:nth-child(even) {
+   background-color: #aff;
+}
+</style>
+</head>
+<body>
+<h1>Debug interface: all appliances</h1>
+<button id="reload">Reload</button>
+<ul id="list">
+
+</ul>
+</body>
+</html>

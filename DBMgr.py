@@ -345,6 +345,26 @@ class DBMgr(object):
 		if len(notWorking_List)>0:
 			email_ret=SendEmail(title, body)
 
+	def ShowRealtime(self, person=None, concise=True):
+		#save into database, with: timestamp, additional data
+		ret={
+			"timestamp":self._now()
+		}
+		if person and person in self.location_of_users:
+			roomID=self.location_of_users[person]
+			if roomID!=None:
+				ret["personal"]=self.calculateRoomFootprint(roomID)
+				#ret["location"]=roomID
+				ret["location"]=self.list_of_rooms[roomID]
+		else:
+			ret["rooms"]=self._getShotRooms(concise)
+			ret["appliances"]=self._getShotAppliances(concise)
+			ret["personal"]=self._getShotPersonal(concise)
+			ret["locations"]=self.location_of_users
+			ret["watchdog_user"]=self.watchdog.watchdogLastSeen_User
+			ret["watchdog_appl"]=self.watchdog.watchdogLastSeen_Appliance
+		return self._encode(ret,True)
+
 	def SaveParameters(self, parameters):
 		self.snapshots_parameters.insert({
 			"timestamp":datetime.datetime.utcnow(),

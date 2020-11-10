@@ -41,10 +41,7 @@
               '<div class="h5 mb-0 font-weight-bold text-gray-800">%value Watts</div>'+
               '<div class="card-body"><div class="chart-area"><canvas id=%id></canvas></div></div>'+
               '</div>'+
-              
-              '<div class="col-auto">'+
-              '<i class="fas fa-calendar fa-2x text-gray-300"></i>'+
-              '</div></div></div></div></div>').replace('%name',item.name).replace('%value',item.value).replace('%id',item.id);
+              '</div></div></div></div>').replace('%name',item.name).replace('%value',item.value).replace('%id',item.id);
         }).join('');
         $('#list').html(html);
         for (var id in payload.appliances) {
@@ -331,7 +328,7 @@
           scales: {
             xAxes: [{
               time: {
-                unit: 'date'
+                unit: 'time'
               },
               gridLines: {
                 display: false,

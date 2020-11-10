@@ -410,7 +410,6 @@ class DBMgr(object):
 		ret["locations"]=self.location_of_users
 		ret["watchdog_user"]=self.watchdog.watchdogLastSeen_User
 		ret["watchdog_appl"]=self.watchdog.watchdogLastSeen_Appliance
-		for appliance in ret["appliances"]:
 
 		return self._encode(ret,True)
 

@@ -14,6 +14,7 @@ urls = (
 	"/api/EnergyReport", Energy.EnergyReport,
 	"/realtime/(.*)","Realtime",
     "/realtime","Realtime",
+    "/realtimeGraphs/(.*)", "RealtimeGraphs",
     "/realtimeGraphs", "RealtimeGraphs",
 	'/', 'index'
 )
@@ -32,7 +33,7 @@ class Realtime:
 		return db.ShowRealtime(person)
 
 class RealtimeGraphs:
-	def GET(self,person=None):
+	def GET(self):
 		return db.ShowRealtimeGraphs()
 
 class MyApplication(web.application):

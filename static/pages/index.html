@@ -295,26 +295,6 @@
   <script src="js/demo/chart-area-demo.js"></script>
   <script src="js/demo/chart-pie-demo.js"></script>
 
-  <script type="text/javascript">
-    function testImage() {
-      var result = null;
-      $.post("http://192.168.0.120:5000/imageStream", {}).done(function( data ) {
-//          data = data.replace(/'/g, '"');
-	  //console.log(typeof data);
-          //console.log(data, status);
-//          var obj = JSON.parse(data);
-	  obj = data;
-          // console.log(obj.RGBImage);
-          document.getElementById("RGBImgInitial").src = 'data:image/png;base64,' + obj.RGBImage;
-          document.getElementById("RGBImgYOLO").src = 'data:image/png;base64,' + obj.RGB_b64;
-          document.getElementById("ThermalImgInitial").src = 'data:image/png;base64,' + obj.ThermalImage;
-          document.getElementById("ThermalImgYOLO").src = 'data:image/png;base64,' + obj.Thermal_b64;
-        }).fail(function() {
-          console.log("Problem parsing json");
-        });
-    }
-    setInterval(testImage, 1000);
-  </script>
 </body>
 
 </html>

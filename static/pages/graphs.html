@@ -327,6 +327,10 @@
           },
           scales: {
             xAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Time'
+              },
               time: {
                 unit: 'time'
               },
@@ -347,6 +351,10 @@
               }
             }],
             yAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Power (W)'
+              },
               ticks: {
                 maxTicksLimit: 5,
                 padding: 10

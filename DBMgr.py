@@ -380,6 +380,40 @@ class DBMgr(object):
 			ret["watchdog_appl"]=self.watchdog.watchdogLastSeen_Appliance
 		return self._encode(ret,True)
 
+	def ShowRealtimeGraphs(self):
+		ret={
+			"timestamp":self._now()
+		}
+		condition = {
+			"timestamp":{
+				"$gte":datetime.datetime.utcnow()-datetime.timedelta(hours=1),
+				"$lt":datetime.datetime.utcnow()
+			}
+		}
+		energy = {}
+		timestamps = {}
+		iterator = self.snapshots_col_appliances.find(condition).sort([("timestamp", pymongo.DESCENDING)])
+		for shot in iterator:
+			appliance_list = shot["data"]
+			for appliance in appliance_list:
+				if appliance not in energy:
+					assert(appliance not in timestamps)
+					energy[appliance] = []
+					timestamps[appliance] = []
+				energy[appliance].append(appliance_list[appliance]["value"])
+				timestamps[appliance].append(shot["timestamp"])
+		ret["rooms"]=self._getShotRooms(concise)
+		ret["appliances"]=self._getShotAppliances(concise)
+		ret["applianceEnergy"] = energy
+		ret["applianceTimestamps"] = timestamps
+		ret["personal"]=self._getShotPersonal(concise)
+		ret["locations"]=self.location_of_users
+		ret["watchdog_user"]=self.watchdog.watchdogLastSeen_User
+		ret["watchdog_appl"]=self.watchdog.watchdogLastSeen_Appliance
+		for appliance in ret["appliances"]:
+
+		return self._encode(ret,True)
+
 	def SaveParameters(self, parameters):
 		self.snapshots_parameters.insert({
 			"timestamp":datetime.datetime.utcnow(),

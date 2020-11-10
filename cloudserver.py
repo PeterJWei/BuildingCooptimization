@@ -14,6 +14,7 @@ urls = (
 	"/api/EnergyReport", Energy.EnergyReport,
 	"/realtime/(.*)","Realtime",
     "/realtime","Realtime",
+    "/realtimeGraphs", "RealtimeGraphs",
 	'/', 'index'
 )
 
@@ -29,6 +30,10 @@ class Realtime:
 		# if "personal" in web.input():
 		# 	return db.ShowRealtimePersonalSummary()
 		return db.ShowRealtime(person)
+
+class RealtimeGraphs:
+	def GET(self,person=None):
+		return db.ShowRealtimeGraphs()
 
 class MyApplication(web.application):
 	def run(self, port=8080, *middleware):

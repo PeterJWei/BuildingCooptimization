@@ -33,7 +33,7 @@ class Realtime:
 		return db.ShowRealtime(person)
 
 class RealtimeGraphs:
-	def GET(self):
+	def GET(self,person=None):
 		return db.ShowRealtimeGraphs()
 
 class MyApplication(web.application):

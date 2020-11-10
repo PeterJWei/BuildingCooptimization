@@ -34,7 +34,7 @@ class Realtime:
 
 class RealtimeGraphs:
 	def GET(self,person=None):
-		return db.ShowRealtimeGraphs()
+		return db.ShowRealtimeGraphs(concise=False)
 
 class MyApplication(web.application):
 	def run(self, port=8080, *middleware):

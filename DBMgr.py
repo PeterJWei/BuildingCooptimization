@@ -380,7 +380,7 @@ class DBMgr(object):
 			ret["watchdog_appl"]=self.watchdog.watchdogLastSeen_Appliance
 		return self._encode(ret,True)
 
-	def ShowRealtimeGraphs(self):
+	def ShowRealtimeGraphs(self, concise=True):
 		ret={
 			"timestamp":self._now()
 		}

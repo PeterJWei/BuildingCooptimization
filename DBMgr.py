@@ -392,14 +392,8 @@ class DBMgr(object):
 		}
 		energy = {}
 		timestamps = {}
-		iterator = None
 		if single:
-			iterator = self.snapshots_col_appliances.find_one(sort=[("timestamp", pymongo.DESCENDING)])
-			print(iterator)
-		else:
-			iterator = self.snapshots_col_appliances.find(condition).sort([("timestamp", pymongo.DESCENDING)])
-
-		for shot in iterator:
+			shot = self.snapshots_col_appliances.find_one(sort=[("timestamp", pymongo.DESCENDING)])
 			appliance_list = shot["data"]
 			for appliance in appliance_list:
 				if appliance not in energy:
@@ -408,6 +402,17 @@ class DBMgr(object):
 					timestamps[appliance] = []
 				energy[appliance].append(appliance_list[appliance]["value"])
 				timestamps[appliance].append(shot["timestamp"])
+		else:
+			iterator = self.snapshots_col_appliances.find(condition).sort([("timestamp", pymongo.DESCENDING)])
+			for shot in iterator:
+				appliance_list = shot["data"]
+				for appliance in appliance_list:
+					if appliance not in energy:
+						assert(appliance not in timestamps)
+						energy[appliance] = []
+						timestamps[appliance] = []
+					energy[appliance].append(appliance_list[appliance]["value"])
+					timestamps[appliance].append(shot["timestamp"])
 		ret["rooms"]=self._getShotRooms(concise)
 		ret["appliances"]=self._getShotAppliances(concise)
 		ret["applianceEnergy"] = energy

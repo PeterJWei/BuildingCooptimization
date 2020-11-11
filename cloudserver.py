@@ -36,10 +36,10 @@ class Realtime:
 
 class RealtimeGraphs:
 	def GET(self,person=None):
-		return db.ShowRealtimeGraphs(concise=False)
+		return db.ShowRealtimeGraphs(single=False, concise=False)
 class RealtimeGraphsSingle:
 	def GET(self,person=None):
-		return db.ShowRealtimeGraphsSingle(concise=False)
+		return db.ShowRealtimeGraphsSingle(single=True, concise=False)
 class MyApplication(web.application):
 	def run(self, port=8080, *middleware):
 		func = self.wsgifunc(*middleware)

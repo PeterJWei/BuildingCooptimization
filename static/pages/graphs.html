@@ -14,6 +14,7 @@
   <script type="text/javascript" src="https://cdn.jsdelivr.net/zepto/1.1.6/modules/fx.min.js"></script>
   <script type="text/javascript">
   $(function(){
+    var graphDictionary = new Object();
     $('#reload').click(function(){
       $.get('/realtimeGraphs/',
       {},
@@ -294,7 +295,7 @@
   <script type="text/javascript">
     function addData(chartID="nwc1000m_a1_plug1", label=0, data=1606000000) {
       console.log("Chart ID", chartID);
-      var chart = document.getElementById(chartID);
+      var chart = graphDictionary[chartID];
       chart.data.labels.push(label);
       chart.data.datasets.forEach((dataset) => {
           dataset.data.push(data);
@@ -415,6 +416,7 @@
           }
         }
       });
+      graphDictionary[chartID] = myLineChart;
     }
   </script>
 

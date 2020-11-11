@@ -39,7 +39,7 @@ class RealtimeGraphs:
 		return db.ShowRealtimeGraphs(single=False, concise=False)
 class RealtimeGraphsSingle:
 	def GET(self,person=None):
-		return db.ShowRealtimeGraphsSingle(single=True, concise=False)
+		return db.ShowRealtimeGraphs(single=True, concise=False)
 class MyApplication(web.application):
 	def run(self, port=8080, *middleware):
 		func = self.wsgifunc(*middleware)

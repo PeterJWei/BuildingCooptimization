@@ -293,14 +293,23 @@
 
   <script type="text/javascript">
     var graphDictionary = new Object();
-    function addData(chartID="nwc1000m_a1_plug1", label=0, data=1606000000) {
-      console.log("Chart ID", chartID);
-      var chart = graphDictionary[chartID];
-      chart.data.labels.push(label);
-      chart.data.datasets.forEach((dataset) => {
-          dataset.data.push(data);
-      });
-      chart.update();
+    function addData(chartID="nwc1000m_a1_plug1", label=1606000000, data=0) {
+      $.get('/realtimeGraphsSingle/',
+      {},
+      function(payload){
+        console.log('Received data',payload);
+        if(!payload.appliances){alert('error!');}
+        var data=[];
+
+        for (var id in payload.appliances) {
+          var chart = graphDictionary[id];
+          chart.data.labels.push(payload.timestamp);
+          chart.data.datasets.forEach((dataset) => {
+              dataset.data.push(payload.appliances[id].value);
+          });
+          chart.update();
+        }
+      }, 'json');
     }
     function removeData(chartID) {
       var chart = document.getElementById(chartID);
@@ -311,7 +320,6 @@
       chart.update();
     }
     function makeChart(chartID, energy, timestamps) {
-      console.log("Chart ID", chartID);
       var ctx = document.getElementById(chartID);
       var myLineChart = new Chart(ctx, {
         type: 'line',

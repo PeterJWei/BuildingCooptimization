@@ -380,7 +380,7 @@ class DBMgr(object):
 			ret["watchdog_appl"]=self.watchdog.watchdogLastSeen_Appliance
 		return self._encode(ret,True)
 
-	def ShowRealtimeGraphs(self, concise=True):
+	def ShowRealtimeGraphs(self, single=True, concise=True):
 		ret={
 			"timestamp":self._now()
 		}
@@ -392,7 +392,13 @@ class DBMgr(object):
 		}
 		energy = {}
 		timestamps = {}
-		iterator = self.snapshots_col_appliances.find(condition).sort([("timestamp", pymongo.DESCENDING)])
+		iterator = None
+		if single:
+			iterator = self.snapshots_col_appliances.find_one(sort=[("timestamp", pymongo.DESCENDING)])
+			print(iterator)
+		else:
+			iterator = self.snapshots_col_appliances.find(condition).sort([("timestamp", pymongo.DESCENDING)])
+
 		for shot in iterator:
 			appliance_list = shot["data"]
 			for appliance in appliance_list:

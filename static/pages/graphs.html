@@ -483,6 +483,12 @@
           console.log("regex", string_regex);
           console.log("match result", string_regex.test(id));
           if (string_regex.test(id)) {
+            console.log("if statement", "Got inside test");
+          }
+          if (true) {
+            console.log("if statement", "true");
+          }
+          if (string_regex.test(id)) {
             console.log("if statement", "Got inside");
             makeChart(id, payload.applianceEnergy[id], payload.applianceTimestamps[id]);
           }

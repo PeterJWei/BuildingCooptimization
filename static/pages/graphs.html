@@ -482,10 +482,10 @@
           console.log("id", id);
           console.log("regex", string_regex);
           console.log("match result", string_regex.test(id));
-          // if (string_regex.test(id)) {
-          //   console.log("if statement", "Got inside");
+          if (string_regex.test(id)) {
+            console.log("if statement", "Got inside");
             makeChart(id, payload.applianceEnergy[id], payload.applianceTimestamps[id]);
-          // }
+          }
         }
       }, 'json');
       setInterval(addData, 60000);

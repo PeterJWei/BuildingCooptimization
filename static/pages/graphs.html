@@ -426,7 +426,7 @@
     }
   </script>
   <script type="text/javascript">
-    var string_regex = /(nwc)/g;
+    var string_regex = /(nwc)/;
     $("#searchForm").submit(function(e) {
         e.preventDefault();
     });
@@ -439,11 +439,11 @@
       console.log("filter", filter);
 
       if (filter === "plugmeters") {
-        string_regex = /(plug)/g;
+        string_regex = /(plug)/;
       } else if (filter === "HVAC") {
-        string_regex = /(vav)|(fcu)/g;
+        string_regex = /(vav)|(fcu)/;
       } else {
-        string_regex = /(nwc)/g;
+        string_regex = /(nwc)/;
       }
 
       $.get('/realtimeGraphs/',

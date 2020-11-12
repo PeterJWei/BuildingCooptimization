@@ -324,7 +324,6 @@
       chart.update();
     }
     function makeChart(chartID, energy, timestamps) {
-      console.log("chart ID", chartID)
       var ctx = document.getElementById(chartID);
       var myLineChart = new Chart(ctx, {
         type: 'line',
@@ -484,6 +483,7 @@
           console.log("regex", string_regex);
           console.log("match result", string_regex.test(id));
           if (string_regex.test(id)) {
+            console.log("if statement", "Got inside");
             makeChart(id, payload.applianceEnergy[id], payload.applianceTimestamps[id]);
           }
         }

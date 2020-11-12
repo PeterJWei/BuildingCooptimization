@@ -302,14 +302,16 @@
         var data=[];
 
         for (var id in payload.appliances) {
-          var chart = graphDictionary[id];
-          chart.data.labels.push(payload.timestamp);
-          chart.data.labels.shift();
-          chart.data.datasets.forEach((dataset) => {
-              dataset.data.push(payload.appliances[id].value);
-              dataset.data.shift();
-          });
-          chart.update();
+          if (string_regex.test(id)) {
+            var chart = graphDictionary[id];
+            chart.data.labels.push(payload.timestamp);
+            chart.data.labels.shift();
+            chart.data.datasets.forEach((dataset) => {
+                dataset.data.push(payload.appliances[id].value);
+                dataset.data.shift();
+            });
+            chart.update();
+          }
         }
       }, 'json');
     }
@@ -430,6 +432,7 @@
     }
   </script>
   <script type="text/javascript">
+    var string_regex = /(nwc)/g;
     $("#searchForm").submit(function(e) {
         e.preventDefault();
     });
@@ -441,7 +444,6 @@
       filter = input.value.toUpperCase();
       console.log("filter", filter);
 
-      var string_regex;
       if (filter === "plugmeters") {
         string_regex = /(plug)/g;
       } else if (filter === "HVAC") {
@@ -485,7 +487,9 @@
         }).join('');
         $('#list').html(html);
         for (var id in payload.appliances) {
-          makeChart(id, payload.applianceEnergy[id], payload.applianceTimestamps[id]);
+          if (string_regex.test(id)) {
+            makeChart(id, payload.applianceEnergy[id], payload.applianceTimestamps[id]);
+          }
         }
       }, 'json');
       setInterval(addData, 60000);

@@ -419,12 +419,6 @@
             intersect: false,
             mode: 'index',
             caretPadding: 10
-            // callbacks: {
-            //   label: function(tooltipItem, chart) {
-            //     var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-            //     return datasetLabel + ': $' + number_format(tooltipItem.yLabel);
-            //   }
-            // }
           }
         }
       });
@@ -463,7 +457,7 @@
         Object.keys(payload.appliances).sort().map(function(id){
           if (string_regex.test(id)) {
             data.push({
-              id:id,
+              id:id + "1",
               name:payload.appliances[id].name,
               value:payload.appliances[id].value
             });
@@ -483,12 +477,13 @@
               '</div></div></div></div>').replace('%name',item.name).replace('%value',item.value).replace('%id',item.id);
         }).join('');
         $('#list').html(html);
+        graphDictionary = new Object();
         for (var id in payload.appliances) {
           console.log("id", id);
           console.log("regex", string_regex);
           console.log("match result", string_regex.test(id));
           if (string_regex.test(id)) {
-            makeChart(id, payload.applianceEnergy[id], payload.applianceTimestamps[id]);
+            makeChart(id + "1", payload.applianceEnergy[id], payload.applianceTimestamps[id]);
           }
         }
       }, 'json');

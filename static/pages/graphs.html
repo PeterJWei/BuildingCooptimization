@@ -49,6 +49,7 @@
         }
       }, 'json');
     }).click();
+    setInterval(addData, 1000);
   });
   </script>
   <!-- Custom fonts for this template-->
@@ -293,7 +294,7 @@
 
   <script type="text/javascript">
     var graphDictionary = new Object();
-    function addData(chartID="nwc1000m_a1_plug1", label=1606000000, data=0) {
+    function addData() {
       $.get('/realtimeGraphsSingle/',
       {},
       function(payload){

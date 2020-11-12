@@ -49,7 +49,7 @@
         }
       }, 'json');
     }).click();
-    setInterval(addData, 15000);
+    setInterval(addData, 60000);
   });
   </script>
   <!-- Custom fonts for this template-->
@@ -141,7 +141,7 @@
               <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
                 <form class="form-inline mr-auto w-100 navbar-search">
                   <div class="input-group">
-                    <input id="search_query" type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+                    <input id="searchQuery" type="text" class="form-control bg-light border-0 small" placeholder="Filter By..." aria-label="Search" aria-describedby="basic-addon2">
                     <div class="input-group-append">
                       <button class="btn btn-primary" type="button" onclick="filterGraphs()">
                         <i class="fas fa-search fa-sm"></i>
@@ -431,10 +431,11 @@
   </script>
   <script type="text/javascript">
     function filterGraphs() {
+
       var input, filter;
-      input = document.getElementById('search_query');
+      input = document.getElementById('searchQuery');
       filter = input.value.toUpperCase();
-      console.log(filter);
+      console.log("filter", filter);
     }
   </script>
 </body>

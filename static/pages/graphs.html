@@ -478,10 +478,11 @@
         }).join('');
         $('#list').html(html);
         graphDictionary = new Object();
+        console.log(payload.appliances);
         for (var id in payload.appliances) {
           console.log("id", id);
-          console.log("regex", string_regex);
-          console.log("match result", string_regex.test(id));
+          // console.log("regex", string_regex);
+          // console.log("match result", string_regex.test(id));
           if (string_regex.test(id)) {
             console.log("if statement", "Got inside test");
           }

@@ -461,8 +461,8 @@
         Object.keys(payload.appliances).sort().map(function(id){
           console.log("id", id);
           console.log("regex", string_regex);
-          console.log("match result", String(id).match(string_regex));
-          if (id.match(string_regex).length > 0) {
+          console.log("match result", string_regex.test(id));
+          if (string_regex.test(id)) {
             data.push({
               id:id,
               name:payload.appliances[id].name,

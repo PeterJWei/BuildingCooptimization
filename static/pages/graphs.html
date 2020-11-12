@@ -443,11 +443,11 @@
 
       var string_regex;
       if (filter === "plugmeters") {
-        string_regex = "/(plug)/g";
+        string_regex = /(plug)/g;
       } else if (filter === "HVAC") {
-        string_regex = "/(vav)|(fcu)/g";
+        string_regex = /(vav)|(fcu)/g;
       } else {
-        string_regex = "/(nwc)/g";
+        string_regex = /(nwc)/g;
       }
 
       $.get('/realtimeGraphs/',

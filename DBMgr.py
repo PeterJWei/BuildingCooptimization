@@ -153,6 +153,7 @@ class DBMgr(object):
 	def __init__(self, start_bg_thread=True):
 		self.dbc=pymongo.MongoClient()
 
+		self.registration_col1=self.dbc.db.registration_col1
 		self.config_col=self.dbc.db.config
 		self.raw_data=self.dbc.db.raw_data
 		self.snapshots_col_rooms=self.dbc.db.snapshots_col_rooms
@@ -454,3 +455,153 @@ class DBMgr(object):
 
 		self._latestSuccessShot=self._now();
 		return True
+
+####################################################################
+## Login Information, for self.registration_col1 ###################
+####################################################################
+	def screenNameCheckAvailability(self, screenName):
+		return len(list(self.registration_col1.find({"screenName":screenName}))) == 0
+	
+	def deviceIDCheckAvailability(self, deviceID):
+		return len(list(self.registration_col1.find({"userID":deviceID}))) == 0
+
+	def screenNameRegister(self, screenName, userID, control=True):
+		self.LogRawData({
+			"type":"screenNameRegister",
+			"time":self._now(),
+			"screenName":screenName,
+			"userID":userID,
+			"rewards":0,
+			"tempRewards":0
+			})
+		try:
+			self.registration_col1.insert({
+				"screenName":screenName,
+				"userID":userID,
+				"control":control,
+				"balance":0,
+				"tempBalance":0
+				})
+			return True
+		except pymongo.errors.DuplicateKeyError:
+			return False
+
+	def userIDRemoveAll(self, userID):
+		self.registration_col1.remove({"userID":userID})
+
+	def updateName(self, deviceID, username):
+		itm = self.registration_col1.find_one({"screenName": username})
+		if (itm is None):
+			return False
+		self.registration_col1.update(
+			{"screenName": username}, 
+			{"$set": {"userID": deviceID}}, multi=True)
+		return True
+
+	def fullRegistration(self, deviceID, name, email, password):
+		try:
+			self.registration_col1.insert({
+				"userID": deviceID})
+			print("successfully inserted new user")
+			self.registration_col1.update({"userID": deviceID},{"$set":{
+				"name": name,
+				"email": email,
+				"password": password,
+				"control": True,
+				"balance": 0,
+				"tempBalance": 0,
+				"loggedIn": True
+				}})
+			return True
+		except pymongo.errors.DuplicateKeyError:
+			return False
+
+	def checkLoginFlow(self, deviceID):
+		user = self.registration_col1.find_one({"userID": deviceID})
+		if user is not None:
+			if user.get("loggedIn"):
+				return "0" #user is logged in
+			else:
+				return "1" #user not logged in
+		return "404" #user not registered
+
+	def getNameFromDeviceID(self, deviceID):
+		user = self.registration_col1.find_one({"userID": deviceID})
+		return user.get("name")
+
+	def login(self, deviceID, email, password):
+		user = self.registration_col1.find_one({"userID": deviceID})
+		if user is not None:
+			if (user.get("email") == email) and (user.get("password") == password):
+				self.registration_col1.update({"userID":deviceID}, {"$set":{"loggedIn":True}})
+				return "0"
+			else:
+				return "1"
+		user = self.registration_col1.find_one({"email": email, "password":password})
+		if user is None:
+			return "404"
+		newInput = {}
+		newInput["userID"] = deviceID
+		newInput["control"] = user.get("control")
+		newInput["password"] = user.get("password")
+		newInput["name"] = user.get("name")
+		newInput["loggedIn"] = True
+		newInput["tempBalance"] = user.get("tempBalance")
+		newInput["balance"] = user.get("balance")
+		newInput["email"] = user.get("email")
+		self.registration_col1.insert(newInput)
+		return "0"
+
+	def logout(self, deviceID):
+		try:
+			self.registration_col1.update({"userID": deviceID},
+				{"$set":{"loggedIn": False}})
+			return "0"
+		except pymongo.errors.DuplicateKeyError:
+			return "1"
+
+	def addPushToken(self, deviceID, token):
+		try:
+			self.registration_col1.update({"userID":deviceID}, {"$set":{"token":token}})
+			return "0"
+		except pymongo.errors.DuplicateKeyError:
+			return "404"
+		return "400"
+
+	def addDeviceToken(self, deviceID, deviceToken):
+		try:
+			user = self.registration_col1.find_one({"userID": deviceID})
+			if (user is not None):
+				if ("devices" not in user):
+					self.registration_col1.update({"userID":deviceID}, {"$set":{"devices":[deviceToken]}})
+					return "0"
+				else:
+					devices = user.get("devices")
+					devices.append(deviceToken)
+					self.registration_col1.update({"userID":deviceID}, {"$set":{"devices":devices}})
+					return "0"
+			return "1"
+		except pymongo.errors.DuplicateKeyError:
+			return "404"
+		return "400"
+
+	def getControl(self, userID):
+		user = self.registration_col1.find_one({"userID":userID})
+		if user != None:
+			if "control" in user:
+				return user.get("control")
+		return True
+
+
+
+
+
+
+
+
+
+
+
+
+
+

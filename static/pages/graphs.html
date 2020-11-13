@@ -44,8 +44,11 @@
               '</div></div></div></div>').replace('%name',item.name).replace('%value',item.value).replace('%id',item.id);
         }).join('');
         $('#list').html(html);
+        var energy, timestamps;
         for (var id in payload.appliances) {
-          makeChart(id, payload.applianceEnergy[id], payload.applianceTimestamps[id]);
+          energy = payload.applianceEnergy[id].reverse();
+          timestamps = payload.applianceEnergy[id].reverse();
+          makeChart(id, energy, timestamps);
         }
       }, 'json');
     }).click();

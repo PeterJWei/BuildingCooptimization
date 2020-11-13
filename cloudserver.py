@@ -6,12 +6,14 @@ import calendar
 import BACNet
 import DBMgr
 import Energy
+import userManagement
 
 db=DBMgr.DBMgr()
 
 urls = (
 	"/api/EnergyHVAC", BACNet.EnergyReportBACNET,
 	"/api/EnergyReport", Energy.EnergyReport,
+	"/api/userManagement", userManagement.userMGM,
 	"/realtime/(.*)","Realtime",
     "/realtime","Realtime",
     "/realtimeGraphs/(.*)", "RealtimeGraphs",

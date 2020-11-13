@@ -47,7 +47,7 @@
         var energy, timestamps;
         for (var id in payload.appliances) {
           energy = payload.applianceEnergy[id].reverse();
-          timestamps = payload.applianceEnergy[id].reverse();
+          timestamps = payload.applianceTimestamps[id].reverse();
           makeChart(id, energy, timestamps);
         }
       }, 'json');

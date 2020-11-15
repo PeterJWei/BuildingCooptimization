@@ -49,7 +49,7 @@ class RealtimeGraphsSingle:
 	def GET(self,person=None):
 		return db.ShowRealtimeGraphs(single=True, concise=False)
 class RealtimeUsers:
-	def GET(self):
+	def GET(self,person=None):
 		return db.ShowRealtimeUsers()
 class MyApplication(web.application):
 	def run(self, port=8080, *middleware):

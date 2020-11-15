@@ -154,6 +154,7 @@ class DBMgr(object):
 		self.dbc=pymongo.MongoClient()
 
 		self.registration_col1=self.dbc.db.registration_col1
+		self.ranking = self.dbc.db.ranking
 		self.config_col=self.dbc.db.config
 		self.raw_data=self.dbc.db.raw_data
 		self.snapshots_col_rooms=self.dbc.db.snapshots_col_rooms
@@ -283,6 +284,11 @@ class DBMgr(object):
 			})
 		self.watchdog.watchdogRefresh_Appliance(applianceID)
 
+	def watchdogRefresh_User(self, userID):
+		if userID not in self.watchdog.watchdogLastSeen_User:
+			self.watchdog.watchdogLastSeen_User[userID]=0
+		self.watchdog.watchdogLastSeen_User[userID]=max(self._now(), self.watchdog.watchdogLastSeen_User[userID])
+
 	def updateUserLocation(self, user_id, in_id=None, out_id=None):
 		self.location_of_users[user_id]=in_id
 		if in_id==out_id:
@@ -330,6 +336,41 @@ class DBMgr(object):
 			else:
 				last_seen=None
 			#self.ReportLocationAssociation(userID, "outOfLab", {"Note":"Reported by Watchdog","last_seen": last_seen})
+
+	def ReportLocationAssociation(self, personID, roomID, raw_data=None):
+		#self.watchdogUserLastSeen()
+		print("Reporting Location for user:")
+		print(personID)
+		oldS=None
+		newS=roomID
+		if personID in self.location_of_users:
+			oldS=self.location_of_users[personID]
+
+		self.LogRawData({
+			"type":"location_report",
+			"roomID":roomID,
+			"personID":personID,
+			"raw":raw_data,
+			"oldS":oldS,
+			"newS":newS
+			})
+		self.watchdogRefresh_User(personID)
+
+		if roomID!=None and roomID not in self.list_of_rooms:
+			#"if no legitimate roomID, then he's out of tracking."
+			newS=None
+			# self.recordEvent(personID,"illegitimateLocationReported",roomID)
+		# else:
+			# self.recordEvent(personID,"locationChange",roomID)
+
+		self.updateUserLocation(personID, newS, oldS)
+
+		if newS!=None:
+			self.list_of_rooms[newS]["phantom_user"]=personID
+			self.list_of_rooms[newS]["phantom_time"] = int(time.mktime(datetime.datetime.now().timetuple()))
+
+		#"people change; should we update now?"
+		self.OptionalSaveShot();
 
 	def watchdogCheckAppliance(self):
 		notWorking_List=[]
@@ -456,6 +497,24 @@ class DBMgr(object):
 		self._latestSuccessShot=self._now();
 		return True
 
+	def OptionalSaveShot(self):
+		#"minimum interval: 10s; in lieu with regular snapshotting"
+		if self._latestSuccessShot< self._now() -10 :
+			self.SaveShot();
+
+
+	def addLocationSample(self, label, sample):
+		return self.dbc.loc_db.sample_col.insert({
+			"label":label,
+			"sample":sample,
+			"timestamp":datetime.datetime.utcnow()
+		})
+
+	def getAllLocationSamples(self):
+		return list(self.dbc.loc_db.sample_col.find())
+
+	def DestroyLocationSamples(self):
+		self.dbc.loc_db.sample_col.remove({})
 ####################################################################
 ## Login Information, for self.registration_col1 ###################
 ####################################################################
@@ -585,6 +644,14 @@ class DBMgr(object):
 			return "404"
 		return "400"
 
+	def userIDLookup(self, userID):
+		ret=list(self.registration_col1.find({"userID":userID}))
+		if len(ret)!=1:
+			return None
+		if "name" in ret[0]:
+			return ret[0]["name"]
+		return ret[0]["screenName"]
+
 	def getControl(self, userID):
 		user = self.registration_col1.find_one({"userID":userID})
 		if user != None:
@@ -595,7 +662,64 @@ class DBMgr(object):
 
 
 
+	def getUserTempBalance(self, deviceID):
+		U = list(self.registration_col1.find({"userID":deviceID}))
+		if (len(U) == 0):
+			return None
+		doc = U[0]
+		return doc["tempBalance"]
 
+	def getUserBalance(self, deviceID):
+		U = list(self.registration_col1.find({"userID":deviceID}))
+		if (len(U) == 0):
+			return None
+		doc = U[0]
+		return doc["balance"]
+
+	def getAttributes(self, username, encodeJson=True):
+		json_return={
+            "username":"username",
+            "frequency":0,
+            "wifi":True,
+            "public":True,
+            "lab":0,
+            "affiliation":0
+		}
+		itm = self.ranking.find_one({"user":username})
+
+		json_return["username"] = username
+		if (itm == None):
+			#print("username not found: " + username)
+			if (encodeJson == True):
+				return self._encode(json_return, False)
+			else:
+				return json_return
+		json_return["lab"] = self.labInt(itm.get("lab"))
+		json_return["affiliation"] = self.affiliationInt(itm.get("affiliation"))
+		json_return["frequency"] = itm.get("frequency")
+		json_return["wifi"] = itm.get("wifi")
+		json_return["public"] = itm.get("public")
+		if (encodeJson == True):
+			return self._encode(json_return, False)
+		else:
+			return json_return
+
+	def labInt(self, x):
+		return {
+    		'Burke Lab':1,
+        	'Teherani Lab': 2,
+        	'Professor Teherani\'s Lab':2,
+        	'Jiang Lab': 3,
+        	'Sajda Lab': 4,
+        	'Danino Lab': 5
+    	}[x]
+
+	def affiliationInt(self, x):
+		return {
+    		'Student':1,
+    		'Professor':2,
+    		'Employee':1
+    	}[x]
 
 
 

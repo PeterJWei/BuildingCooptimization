@@ -7,6 +7,8 @@ import BACNet
 import DBMgr
 import Energy
 import userManagement
+import LocationBeacons
+# import appSupport
 
 db=DBMgr.DBMgr()
 
@@ -14,6 +16,8 @@ urls = (
 	"/api/EnergyHVAC", BACNet.EnergyReportBACNET,
 	"/api/EnergyReport", Energy.EnergyReport,
 	"/api/userManagement", userManagement.userMGM,
+	# "/api/appSupport", appSupport.appURL,
+	"/api/Beacons", LocationBeacons.Beacons,
 	"/realtime/(.*)","Realtime",
     "/realtime","Realtime",
     "/realtimeGraphs/(.*)", "RealtimeGraphs",

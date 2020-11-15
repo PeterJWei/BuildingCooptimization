@@ -24,6 +24,8 @@ urls = (
     "/realtimeGraphs", "RealtimeGraphs",
     "/realtimeGraphsSingle/(.*)", "RealtimeGraphsSingle",
     "/realtimeGraphsSingle", "RealtimeGraphsSingle",
+    "/realtimeUsers/(.*)", "RealtimeUsers",
+    "/realtimeUsers", "RealtimeUsers",
 	'/', 'index'
 )
 
@@ -46,6 +48,9 @@ class RealtimeGraphs:
 class RealtimeGraphsSingle:
 	def GET(self,person=None):
 		return db.ShowRealtimeGraphs(single=True, concise=False)
+class RealtimeUsers:
+	def GET(self):
+		return db.ShowRealtimeUsers()
 class MyApplication(web.application):
 	def run(self, port=8080, *middleware):
 		func = self.wsgifunc(*middleware)

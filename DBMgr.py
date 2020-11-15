@@ -163,7 +163,7 @@ class DBMgr(object):
 
 		self.snapshots_parameters=self.dbc.db.snapshots_parameters
 		self._latestSuccessShot=0
-		
+
 		self._ReadConfigs()
 		self.watchdog = Watchdog(
 			self.WATCHDOG_TIMEOUT_USER,
@@ -465,6 +465,13 @@ class DBMgr(object):
 		ret["watchdog_user"]=self.watchdog.watchdogLastSeen_User
 		ret["watchdog_appl"]=self.watchdog.watchdogLastSeen_Appliance
 
+		return self._encode(ret,True)
+
+	def ShowRealtimeUsers(self):
+		ret={
+			"timestamp":self._now()
+		}
+		ret["locations"] = self.location_of_users
 		return self._encode(ret,True)
 
 	def SaveParameters(self, parameters):

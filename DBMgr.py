@@ -472,6 +472,7 @@ class DBMgr(object):
 			"timestamp":self._now()
 		}
 		ret["locations"] = self.location_of_users
+		ret["watchdog_user"]=self.watchdog.watchdogLastSeen_User
 		return self._encode(ret,True)
 
 	def SaveParameters(self, parameters):

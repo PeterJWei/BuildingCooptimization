@@ -19,11 +19,11 @@
       {},
       function(payload){
         console.log('Received data',payload);
-        if(!payload.appliances){alert('error!');}
+        if(!payload.locations){alert('error!');}
         var data=[];
-        console.log('Last seen', payload.watchdog_appl);
+        console.log('Last seen', payload.watchdog_user);
         //for(var id in payload.appliances){}
-        Object.keys(payload.appliances).sort().map(function(id){
+        Object.keys(payload.locations).sort().map(function(id){
           data.push({
             id:id,
             value:payload.locations[id]

@@ -110,7 +110,8 @@ class LocationPredictor:
         #return roomID
 
 class BeaconVals:
-	predictor = LocationPredictor()
+	def __init__(self):
+		self.predictor = LocationPredictor()
 
 	def POST(self):
 		raw_data = web.data()

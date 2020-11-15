@@ -162,7 +162,8 @@ class DBMgr(object):
 		self.snapshots_col_users=self.dbc.db.snapshots_col_users
 
 		self.snapshots_parameters=self.dbc.db.snapshots_parameters
-
+		self._latestSuccessShot=0
+		
 		self._ReadConfigs()
 		self.watchdog = Watchdog(
 			self.WATCHDOG_TIMEOUT_USER,

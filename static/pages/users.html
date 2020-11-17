@@ -308,10 +308,16 @@
         for (var id in payload.locations) {
           var chart = graphDictionary[id];
           chart.data.labels.push(payload.timestamp);
+          if (chart.data.labels.length > 10) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+            chart.data.datasets[1].data.shift();
+            chart.data.datasets[2].data.shift();
+          }
           // chart.data.labels.shift();
           chart.data.datasets[0].data.push([payload.energy[id][1]]);
-          chart.data.datasets[1].data.push([payload.energy[id][2]]);
-          chart.data.datasets[2].data.push([payload.energy[id][3]]);
+          chart.data.datasets[1].data.push([payload.energy[id][1] + payload.energy[id][2]]);
+          chart.data.datasets[2].data.push([payload.energy[id][1] + payload.energy[id][2] + payload.energy[id][3]]);
           // chart.data.datasets.forEach((dataset) => {
           //     dataset.data.push(payload.appliances[id].value);
           //     dataset.data.shift();
@@ -346,32 +352,32 @@
           {
             label: "Light",
             lineTension: 0.3,
-            backgroundColor: "rgba(78, 115, 223, 0.05)",
-            borderColor: "rgba(78, 115, 223, 1)",
+            backgroundColor: "rgba(223, 78, 115, 0.05)",
+            borderColor: "rgba(223, 78, 115, 1)",
             pointRadius: 3,
-            pointBackgroundColor: "rgba(78, 115, 223, 1)",
-            pointBorderColor: "rgba(78, 115, 223, 1)",
+            pointBackgroundColor: "rgba(223, 78, 115, 1)",
+            pointBorderColor: "rgba(223, 78, 115, 1)",
             pointHoverRadius: 3,
-            pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-            pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+            pointHoverBackgroundColor: "rgba(223, 78, 115, 1)",
+            pointHoverBorderColor: "rgba(223, 78, 115, 1)",
             pointHitRadius: 10,
             pointBorderWidth: 2,
-            data: [Light],
+            data: [HVAC + Light],
           },
           {
             label: "Electrical",
             lineTension: 0.3,
-            backgroundColor: "rgba(78, 115, 223, 0.05)",
-            borderColor: "rgba(78, 115, 223, 1)",
+            backgroundColor: "rgba(115, 223, 78, 0.05)",
+            borderColor: "rgba(115, 223, 78, 1)",
             pointRadius: 3,
-            pointBackgroundColor: "rgba(78, 115, 223, 1)",
-            pointBorderColor: "rgba(78, 115, 223, 1)",
+            pointBackgroundColor: "rgba(115, 223, 78, 1)",
+            pointBorderColor: "rgba(115, 223, 78, 1)",
             pointHoverRadius: 3,
-            pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-            pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+            pointHoverBackgroundColor: "rgba(115, 223, 78, 1)",
+            pointHoverBorderColor: "rgba(115, 223, 78, 1)",
             pointHitRadius: 10,
             pointBorderWidth: 2,
-            data: [Electrical],
+            data: [HVAC + Light + Electrical],
           }],
         },
         options: {

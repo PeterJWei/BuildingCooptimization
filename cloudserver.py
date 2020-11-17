@@ -26,6 +26,8 @@ urls = (
     "/realtimeGraphsSingle", "RealtimeGraphsSingle",
     "/realtimeUsers/(.*)", "RealtimeUsers",
     "/realtimeUsers", "RealtimeUsers",
+    "/realtimeUsersSingle/(.*)", "RealtimeUsersSingle",
+    "/realtimeUsersSingle", "RealtimeUsersSingle",
 	'/', 'index'
 )
 
@@ -49,6 +51,9 @@ class RealtimeGraphsSingle:
 	def GET(self,person=None):
 		return db.ShowRealtimeGraphs(single=True, concise=False)
 class RealtimeUsers:
+	def GET(self,person=None):
+		return db.ShowRealtimeUsers()
+class RealtimeUsersSingle:
 	def GET(self,person=None):
 		return db.ShowRealtimeUsers()
 class MyApplication(web.application):

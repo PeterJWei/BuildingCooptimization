@@ -505,7 +505,7 @@ class DBMgr(object):
 		ret["energy"] = {}
 		for user in self.location_of_users:
 			location = self.location_of_users[user]
-			energy = self.calculateEnergyFootprint("nwc1000m_a6")
+			energy = self.calculateEnergyFootprint(location)
 			ret["energy"][user] = [energy["value"], energy["HVAC"], energy["Light"], energy["Electrical"]]
 		return self._encode(ret,True)
 

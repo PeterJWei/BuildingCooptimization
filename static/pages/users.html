@@ -48,7 +48,7 @@
       },
       'json');
     }).click();
-    setInterval(addData, 60000);
+    setInterval(addData, 5000);
   });
   </script>
   <!-- Custom fonts for this template-->
@@ -306,19 +306,17 @@
         if(!payload.locations){alert('error!');}
         var data=[];
         for (var id in payload.locations) {
-          if (string_regex.test(id)) {
-            var chart = graphDictionary[id];
-            chart.data.labels.push(payload.timestamp);
-            // chart.data.labels.shift();
-            chart.data.datasets[0].data.push(payload.energy[id][1]);
-            chart.data.datasets[1].data.push(payload.energy[id][2]);
-            chart.data.datasets[2].data.push(payload.energy[id][3]);
-            // chart.data.datasets.forEach((dataset) => {
-            //     dataset.data.push(payload.appliances[id].value);
-            //     dataset.data.shift();
-            // });
-            chart.update();
-          }
+          var chart = graphDictionary[id];
+          chart.data.labels.push(payload.timestamp);
+          // chart.data.labels.shift();
+          chart.data.datasets[0].data.push([payload.energy[id][1]]);
+          chart.data.datasets[1].data.push([payload.energy[id][2]]);
+          chart.data.datasets[2].data.push([payload.energy[id][3]]);
+          // chart.data.datasets.forEach((dataset) => {
+          //     dataset.data.push(payload.appliances[id].value);
+          //     dataset.data.shift();
+          // });
+          chart.update();
         }
       }, 'json');
     }
@@ -328,7 +326,7 @@
       var myLineChart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: timestamp,
+          labels: [timestamp],
           datasets: [
           {
             label: "HVAC",
@@ -343,7 +341,7 @@
             pointHoverBorderColor: "rgba(78, 115, 223, 1)",
             pointHitRadius: 10,
             pointBorderWidth: 2,
-            data: HVAC,
+            data: [HVAC],
           },
           {
             label: "Light",
@@ -358,7 +356,7 @@
             pointHoverBorderColor: "rgba(78, 115, 223, 1)",
             pointHitRadius: 10,
             pointBorderWidth: 2,
-            data: Light,
+            data: [Light],
           },
           {
             label: "Electrical",
@@ -373,7 +371,7 @@
             pointHoverBorderColor: "rgba(78, 115, 223, 1)",
             pointHitRadius: 10,
             pointBorderWidth: 2,
-            data: Electrical,
+            data: [Electrical],
           }],
         },
         options: {

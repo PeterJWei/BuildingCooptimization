@@ -250,7 +250,6 @@ class DBMgr(object):
 		return ret
 
 	def calculateEnergyFootprint(self, roomID, encoded=True):
-		
 		ret={
 			"value":0,
 			"HVAC":0,
@@ -503,6 +502,11 @@ class DBMgr(object):
 		}
 		ret["locations"] = self.location_of_users
 		ret["watchdog_user"]=self.watchdog.watchdogLastSeen_User
+		ret["energy"] = {}
+		for user in self.location_of_users:
+			location = self.location_of_users[user]
+			energy = calculateEnergyFootprint("nwc1000m_a6")
+			ret["energy"][user] = [energy["value"], energy["HVAC"], energy["Light"], energy["Electrical"]]
 		return self._encode(ret,True)
 
 	def SaveParameters(self, parameters):

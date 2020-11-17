@@ -12,19 +12,19 @@ from watchdog import Watchdog
 from Email import SendEmail
 
 class MongoJsonEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, datetime.datetime):
-            #return obj.isoformat()
-            utc_seconds = calendar.timegm(obj.utctimetuple())
-            return utc_seconds
-        elif isinstance(obj, datetime.date):
-            return obj.isoformat()
-        elif isinstance(obj, datetime.timedelta):
-            return (datetime.datetime.min + obj).time().isoformat()
-        elif isinstance(obj, ObjectId):
-            return str(obj)
-        else:
-            return super(MongoJsonEncoder, self).default(obj)
+	def default(self, obj):
+		if isinstance(obj, datetime.datetime):
+			#return obj.isoformat()
+			utc_seconds = calendar.timegm(obj.utctimetuple())
+			return utc_seconds
+		elif isinstance(obj, datetime.date):
+			return obj.isoformat()
+		elif isinstance(obj, datetime.timedelta):
+			return (datetime.datetime.min + obj).time().isoformat()
+		elif isinstance(obj, ObjectId):
+			return str(obj)
+		else:
+			return super(MongoJsonEncoder, self).default(obj)
 
 def add_log(msg,obj):
 	print("Got log:"+msg)
@@ -247,6 +247,36 @@ class DBMgr(object):
 			total_con+=app["share"]
 			ret["consumptions"]+=[app]
 		ret["value"]=total_con
+		return ret
+
+	def calculateEnergyFootprint(self, roomID, encoded=True):
+		
+		ret={
+			"value":0,
+			"HVAC":0,
+			"Light":0,
+			"Electrical":0
+		}
+		if (roomID is None):
+			return ret
+		app_list=self.list_of_rooms[roomID]["appliances"]
+		total_con = 0.0
+		print("starting appliances")
+		for applianceID in app_list:
+			app = self.list_of_appliances[applianceID]
+			appValue = app["value"]/(1.0*app["total_users"])
+			total_con += appValue
+			if (app["type"] == "Electrical"):
+				ret["Electrical"] += appValue
+				continue
+			if (app["type"] == "HVAC"):
+				ret["HVAC"] += appValue
+				continue
+			if (app["type"] == "Light"):
+				ret["Light"] += appValue
+		ret["value"]=total_con
+		if (encoded):
+			return self._encode(ret, False)
 		return ret
 
 	def ReportEnergyValue(self, applianceID, value, raw_data=None):
@@ -524,6 +554,21 @@ class DBMgr(object):
 
 	def DestroyLocationSamples(self):
 		self.dbc.loc_db.sample_col.remove({})
+
+	def getAllUsers(self):
+		usernames = []
+		users = list(self.registration_col1.find())
+		#print users
+		for user in users:
+			if "name" not in user:
+				continue
+			#print "debug", user
+			usernames.append(user["name"])
+		nameList = ",".join(usernames)
+		ret = {
+				"names":usernames
+		}
+		return self._encode(ret, False)
 ####################################################################
 ## Login Information, for self.registration_col1 ###################
 ####################################################################
@@ -668,6 +713,11 @@ class DBMgr(object):
 				return user.get("control")
 		return True
 
+	def getUserLocation(self, user_id):
+		if user_id in self.location_of_users:
+			return self.location_of_users[user_id]
+		else:
+			return None
 
 
 
@@ -687,12 +737,12 @@ class DBMgr(object):
 
 	def getAttributes(self, username, encodeJson=True):
 		json_return={
-            "username":"username",
-            "frequency":0,
-            "wifi":True,
-            "public":True,
-            "lab":0,
-            "affiliation":0
+			"username":"username",
+			"frequency":0,
+			"wifi":True,
+			"public":True,
+			"lab":0,
+			"affiliation":0
 		}
 		itm = self.ranking.find_one({"user":username})
 
@@ -715,20 +765,20 @@ class DBMgr(object):
 
 	def labInt(self, x):
 		return {
-    		'Burke Lab':1,
-        	'Teherani Lab': 2,
-        	'Professor Teherani\'s Lab':2,
-        	'Jiang Lab': 3,
-        	'Sajda Lab': 4,
-        	'Danino Lab': 5
-    	}[x]
+			'Burke Lab':1,
+			'Teherani Lab': 2,
+			'Professor Teherani\'s Lab':2,
+			'Jiang Lab': 3,
+			'Sajda Lab': 4,
+			'Danino Lab': 5
+		}[x]
 
 	def affiliationInt(self, x):
 		return {
-    		'Student':1,
-    		'Professor':2,
-    		'Employee':1
-    	}[x]
+			'Student':1,
+			'Professor':2,
+			'Employee':1
+		}[x]
 
 
 

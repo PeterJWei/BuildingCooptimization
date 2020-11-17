@@ -312,7 +312,7 @@
           chart.data.datasets[0].data.push([payload.energy[id][1]]);
           chart.data.datasets[1].data.push([payload.energy[id][1] + payload.energy[id][2]]);
           chart.data.datasets[2].data.push([payload.energy[id][1] + payload.energy[id][2] + payload.energy[id][3]]);
-          if (chart.data.labels.length > 3) {
+          if (chart.data.labels.length > 7) {
             chart.data.labels.shift();
             chart.data.datasets[0].data.shift();
             chart.data.datasets[1].data.shift();
@@ -421,7 +421,7 @@
                 labelString: 'Power (W)'
               },
               ticks: {
-                suggestedMin: 0,
+                // suggestedMin: 0,
                 maxTicksLimit: 5,
                 padding: 10
                 // // Include a dollar sign in the ticks

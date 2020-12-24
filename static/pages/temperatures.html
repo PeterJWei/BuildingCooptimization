@@ -15,19 +15,19 @@
   <script type="text/javascript">
   $(function(){
     $('#reload').click(function(){
-      $.get('/realtimeGraphs/',
+      $.get('/realtimeTemps/',
       {},
       function(payload){
         console.log('Received data',payload);
-        if(!payload.appliances){alert('error!');}
+        if(!payload.raw_temp_values){alert('error!');}
         var data=[];
-
         //for(var id in payload.appliances){}
-        Object.keys(payload.appliances).sort().map(function(id){
+        Object.keys(payload.raw_temp_values).sort().map(function(id){
           data.push({
             id:id,
-            name:payload.appliances[id].name,
-            value:payload.appliances[id].value
+            temp:payload.raw_temp_values[id],
+            pressure:payload.raw_pressure_values[id],
+            humidity:payload.raw_humidity_values[id]
           });
         });
         
@@ -38,21 +38,17 @@
               '<div class="row no-gutters align-items-center">'+
               '<div class="col mr-2">'+
               '<div class="text-xs font-weight-bold text-primary text-uppercase mb-1"><b>%name</b></div>'+
-              '<div class="h5 mb-0 font-weight-bold text-gray-800">%value Watts</div>'+
-              '<div class="card-body"><div class="chart-area"><canvas id=%id></canvas></div></div>'+
-              '</div>'+
-              '</div></div></div></div>').replace('%name',item.name).replace('%value',item.value).replace('%id',item.id);
+              '<div class="h5 mb-0 font-weight-bold text-gray-800" id="Temp%id">%temp C<br />%pressure mbar<br />%humidity \%RH</div>'+
+              '</div></div></div></div></div>').replace('%name',item.id).replace('%temp',item.temp).replace('%id', item.id).replace('%pressure',item.pressure).replace('%humidity',item.humidity);
         }).join('');
         $('#list').html(html);
-        var energy, timestamps;
-        for (var id in payload.appliances) {
-          energy = payload.applianceEnergy[id].reverse();
-          timestamps = payload.applianceTimestamps[id].reverse();
-          makeChart(id, energy, timestamps);
-        }
-      }, 'json');
+//        for (var id in payload.locations) {
+//         makeChart(id, payload.energy[id][0], payload.energy[id][1], payload.energy[id][2], payload.energy[id][3], payload.timestamp);
+//        }
+      },
+      'json');
     }).click();
-    setInterval(addData, 60000);
+    setInterval(addData, 5000);
   });
   </script>
   <!-- Custom fonts for this template-->
@@ -75,7 +71,7 @@
       <!-- Sidebar - Brand -->
       <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
         <div class="sidebar-brand-icon rotate-n-15">
-          <i class="fas fa-laugh-wink"></i>
+<!--          <i class="fas fa-laugh-wink"></i> -->
         </div>
         <div class="sidebar-brand-text mx-3">Building Co-Optimization</div>
       </a>
@@ -109,6 +105,7 @@
           <i class="fas fa-fw fa-temperature-high"></i>
           <span>Temperatures</span></a>
       </li>
+
       <!-- Divider -->
       <hr class="sidebar-divider">
       
@@ -136,11 +133,11 @@
           </button>
 
           <!-- Topbar Search -->
-          <form id="searchForm" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+          <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
             <div class="input-group">
-              <input id="searchQuery" type="text" class="form-control bg-light border-0 small" placeholder="Filter By..." aria-label="Search" aria-describedby="basic-addon2">
+              <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
               <div class="input-group-append">
-                <button class="btn btn-primary" type="button" id="searchTerm">
+                <button class="btn btn-primary" type="button">
                   <i class="fas fa-search fa-sm"></i>
                 </button>
               </div>
@@ -159,9 +156,9 @@
               <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
                 <form class="form-inline mr-auto w-100 navbar-search">
                   <div class="input-group">
-                    <input id="searchDropdown" type="text" class="form-control bg-light border-0 small" placeholder="Filter By..." aria-label="Search" aria-describedby="basic-addon2">
+                    <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
                     <div class="input-group-append">
-                      <button class="btn btn-primary" type="button" id="search">
+                      <button class="btn btn-primary" type="button">
                         <i class="fas fa-search fa-sm"></i>
                       </button>
                     </div>
@@ -312,43 +309,50 @@
   <script type="text/javascript">
     var graphDictionary = new Object();
     function addData() {
-      $.get('/realtimeGraphsSingle/',
+      $.get('/realtimeTemps/',
       {},
       function(payload){
         console.log('Received data',payload);
-        if(!payload.appliances){alert('error!');}
+        if(!payload.raw_temp_values){alert('error!');}
         var data=[];
-
-        for (var id in payload.appliances) {
-          if (string_regex.test(id)) {
-            var chart = graphDictionary[id];
-            chart.data.labels.push(payload.timestamp);
-            chart.data.labels.shift();
-            chart.data.datasets.forEach((dataset) => {
-                dataset.data.push(payload.appliances[id].value);
-                dataset.data.shift();
-            });
-            chart.update();
-          }
+        for (var id in payload.raw_temp_values) {
+	  console.log('ID: ', id);
+          var temp_val = payload.raw_temp_values[id].toString();
+          var pressure_val = payload.raw_pressure_values[id].toString();
+          var humidity_val = payload.raw_humidity_values[id].toString();
+          var parameterString = temp_val.concat(" C<br />").concat(pressure_val).concat(" mbar<br />").concat(humidity_val).concat(" \%RH");
+	  document.getElementById("Temp".concat(id)).innerHTML = parameterString;
+/*
+          var chart = graphDictionary[id];
+          chart.data.labels.push(payload.timestamp);
+          // chart.data.labels.shift();
+          chart.data.datasets[0].data.push([payload.energy[id][1]]);
+          chart.data.datasets[1].data.push([payload.energy[id][1] + payload.energy[id][2]]);
+          chart.data.datasets[2].data.push([payload.energy[id][1] + payload.energy[id][2] + payload.energy[id][3]]);
+          // if (chart.data.labels.length > 7) {
+          //   chart.data.labels.shift();
+          //   chart.data.datasets[0].data.shift();
+          //   chart.data.datasets[1].data.shift();
+          //   chart.data.datasets[2].data.shift();
+          // }
+          // chart.data.datasets.forEach((dataset) => {
+          //     dataset.data.push(payload.appliances[id].value);
+          //     dataset.data.shift();
+          // });
+          chart.update();*/
         }
       }, 'json');
     }
-    function removeData(chartID) {
-      var chart = document.getElementById(chartID);
-      chart.data.labels.pop();
-      chart.data.datasets.forEach((dataset) => {
-          dataset.data.pop();
-      });
-      chart.update();
-    }
-    function makeChart(chartID, energy, timestamps) {
+
+    function makeChart(chartID, energy, HVAC, Light, Electrical, timestamp) {
       var ctx = document.getElementById(chartID);
       var myLineChart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: timestamps,
-          datasets: [{
-            label: "Power (W)",
+          labels: [timestamp],
+          datasets: [
+          {
+            label: "HVAC",
             lineTension: 0.3,
             backgroundColor: "rgba(78, 115, 223, 0.05)",
             borderColor: "rgba(78, 115, 223, 1)",
@@ -360,7 +364,37 @@
             pointHoverBorderColor: "rgba(78, 115, 223, 1)",
             pointHitRadius: 10,
             pointBorderWidth: 2,
-            data: energy,
+            data: [HVAC],
+          },
+          {
+            label: "Light",
+            lineTension: 0.3,
+            backgroundColor: "rgba(223, 78, 115, 0.05)",
+            borderColor: "rgba(223, 78, 115, 1)",
+            pointRadius: 3,
+            pointBackgroundColor: "rgba(223, 78, 115, 1)",
+            pointBorderColor: "rgba(223, 78, 115, 1)",
+            pointHoverRadius: 3,
+            pointHoverBackgroundColor: "rgba(223, 78, 115, 1)",
+            pointHoverBorderColor: "rgba(223, 78, 115, 1)",
+            pointHitRadius: 10,
+            pointBorderWidth: 2,
+            data: [HVAC + Light],
+          },
+          {
+            label: "Electrical",
+            lineTension: 0.3,
+            backgroundColor: "rgba(115, 223, 78, 0.05)",
+            borderColor: "rgba(115, 223, 78, 1)",
+            pointRadius: 3,
+            pointBackgroundColor: "rgba(115, 223, 78, 1)",
+            pointBorderColor: "rgba(115, 223, 78, 1)",
+            pointHoverRadius: 3,
+            pointHoverBackgroundColor: "rgba(115, 223, 78, 1)",
+            pointHoverBorderColor: "rgba(115, 223, 78, 1)",
+            pointHitRadius: 10,
+            pointBorderWidth: 2,
+            data: [HVAC + Light + Electrical],
           }],
         },
         options: {
@@ -404,6 +438,7 @@
                 labelString: 'Power (W)'
               },
               ticks: {
+                // suggestedMin: 0,
                 maxTicksLimit: 5,
                 padding: 10
                 // // Include a dollar sign in the ticks
@@ -421,7 +456,13 @@
             }],
           },
           legend: {
-            display: false
+            display: true,
+            align: "left",
+            position: "bottom",
+            labels: {
+              usePointStyle: true,
+              boxWidth: 4
+            },
           },
           tooltips: {
             backgroundColor: "rgb(255,255,255)",
@@ -442,74 +483,6 @@
       });
       graphDictionary[chartID] = myLineChart;
     }
-  </script>
-  <script type="text/javascript">
-    var string_regex = /(nwc)/;
-    $("#searchForm").submit(function(e) {
-        e.preventDefault();
-    });
-
-    $("#searchTerm").on('click', function (){
-      var input, filter;
-      input = document.getElementById('searchQuery');
-      filter = input.value.toUpperCase();
-
-      if (filter === "PLUGMETERS") {
-        string_regex = /(plug)/;
-      } else if (filter === "HVAC") {
-        string_regex = /(vav)|(fcu)/;
-      } else {
-        string_regex = /(nwc)/;
-      }
-
-      $.get('/realtimeGraphs/',
-      {},
-      function(payload){
-        if(!payload.appliances){alert('error!');}
-        var data=[];
-
-        //for(var id in payload.appliances){}
-        Object.keys(payload.appliances).sort().map(function(id){
-          if (string_regex.test(id)) {
-            data.push({
-              id:id,
-              name:payload.appliances[id].name,
-              value:payload.appliances[id].value
-            });
-          }
-        });
-        
-        var html=data.map(function(item){
-          return ('<div class="col-xl-3 col-md-6 mb-4">'+
-              '<div class="card border-left-primary shadow h-100 py-2">'+
-              '<div class="card-body">'+
-              '<div class="row no-gutters align-items-center">'+
-              '<div class="col mr-2">'+
-              '<div class="text-xs font-weight-bold text-primary text-uppercase mb-1"><b>%name</b></div>'+
-              '<div class="h5 mb-0 font-weight-bold text-gray-800">%value Watts</div>'+
-              '<div class="card-body"><div class="chart-area"><canvas id=%id></canvas></div></div>'+
-              '</div>'+
-              '</div></div></div></div>').replace('%name',item.name).replace('%value',item.value).replace('%id',item.id);
-        }).join('');
-        $('#list').html(html);
-        graphDictionary = new Object();
-        console.log(payload.appliances);
-        for (var id in payload.appliances) {
-          if (string_regex.test(id)) {
-            makeChart(id, payload.applianceEnergy[id], payload.applianceTimestamps[id]);
-          }
-        }
-      }, 'json');
-      setInterval(addData, 60000);
-    });
-
-    // function filterGraphs() {
-
-    //   var input, filter;
-    //   input = document.getElementById('searchQuery');
-    //   filter = input.value.toUpperCase();
-    //   console.log("filter", filter);
-    // }
   </script>
 </body>
 

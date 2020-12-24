@@ -58,6 +58,8 @@ class DBMgr(object):
 		
 
 	def _ConstructInMemoryGraph(self):
+		self.list_of_temp_values={};
+		self.list_of_light_values={};
 		self.list_of_rooms={};
 		self.list_of_appliances={};
 		self.location_of_users={};
@@ -277,7 +279,12 @@ class DBMgr(object):
 		if (encoded):
 			return self._encode(ret, False)
 		return ret
-
+	
+	def ReportTempValue(self, applianceID, T, P, H):
+		self.list_of_temp_values[applianceID] = [float(T), float(P), float(H)]
+	def ReportLightValue(self, applianceID, raw_value):
+		self.list_of_light_values[applianceID] = raw_value
+		
 	def ReportEnergyValue(self, applianceID, value, raw_data=None):
 		"maintenance tree node's energy consumption item, and update a sum value"
 		known_room=None
@@ -496,6 +503,33 @@ class DBMgr(object):
 
 		return self._encode(ret,True)
 
+	def ShowRealtimeTempParameters(self):
+		ret={
+			"timestamp":self._now()
+		}
+		T_dict, P_dict, H_dict = {}, {}, {}
+		for applianceID in self.list_of_temp_values:
+			(T, P, H) = self.list_of_temp_values[applianceID]
+			T_dict[applianceID] = T
+			P_dict[applianceID] = P
+			H_dict[applianceID] = H
+		ret["raw_temp_values"] = T_dict
+		ret["raw_pressure_values"] = P_dict
+		ret["raw_humidity_values"] = H_dict
+		return self._encode(ret, True)
+
+	def ShowRealtimeLights(self):
+		ret={
+			"timestamp":self._now()
+		}
+		appliancePower = {}
+		ret["raw_light_values"] = self.list_of_light_values
+		for applianceID in self.list_of_light_values:
+			if applianceID in self.list_of_appliances:
+				appliancePower[applianceID] = self.list_of_appliances[applianceID]["value"]
+		ret["power"] = appliancePower
+		return self._encode(ret,True)
+		
 	def ShowRealtimeUsers(self):
 		ret={
 			"timestamp":self._now()

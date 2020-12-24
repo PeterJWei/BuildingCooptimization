@@ -1,5 +1,22 @@
 import re
 import pymongo
+				
+PUBLIC_SPACE = 0
+BURKE_LAB = 1
+TEHERANI_LAB = 2
+JIANG_LAB = 3
+SAJDA_LAB = 4
+DANINO_LAB = 5
+BIOMED_LAB = 6
+OFFICE_SPACE = 0
+STUDENT_WORK_SPACE = 1
+GENERAL_SPACE = 2
+WINDOWED = True
+NOT_WINDOWED = False
+ACTIONABLE = True
+NOT_ACTIONABLE = False
+DUTY_CYCLE = True
+NO_DUTY_CYCLE = False
 
 class DBInit(object):
 	def _GetConfigValue(self,key):
@@ -121,6 +138,9 @@ class DBInit(object):
 		addAppliance("nwc1003g_plug3", "Plugmeter in 1003G (Projector&XBox)", "Electrical", "^nwc1003g$", ACTIONABLE, DUTY_CYCLE)
 		addAppliance("nwc1003b_light", "Lights in 1003B Lab", "Light", "nwc1003b.*", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc1003g_light", "Lights in 1003G Lab", "Light", "^nwc1003g$", ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1003gA_light", "Lights in 1003G_A Lab", "Light", "nwc1003g_a", ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1003gB_light", "Lights in 1003G_B Lab", "Light", "nwc1003g_b", ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1003gC_light", "Lights in 1003G_C Lab", "Light", "nwc1003g_c", ACTIONABLE, NO_DUTY_CYCLE)
 
 		addAppliance("nwc1003gA_vav", "Heating Unit in 1003G_A", "HVAC", "nwc1003g_a", ACTIONABLE, DUTY_CYCLE) #BIOMED LAB 1
 		addAppliance("nwc1003gB_vav", "Heating Unit in 1003G_B", "HVAC", "nwc1003g_b", ACTIONABLE, DUTY_CYCLE) #TEHERANI LAB
@@ -144,6 +164,15 @@ class DBInit(object):
 		addAppliance("nwc1000m_a1_plug3", "Power strip #3 in Mezzaine Level, Aisle #1", "Electrical", "nwc1000m_a1", ACTIONABLE, NO_DUTY_CYCLE)
 
 		addAppliance("nwc1000m_light", "Shared Lighting in Mezzaine Level", "Light", "nwc1000m_.*", NOT_ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1000m_a1_light", "Shared Lighting in Mezzaine Level", "Light", "nwc1000m_a1", NOT_ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1000m_a2_light", "Shared Lighting in Mezzaine Level", "Light", "nwc1000m_a2", NOT_ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1000m_a3_light", "Shared Lighting in Mezzaine Level", "Light", "nwc1000m_a3", NOT_ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1000m_a4_light", "Shared Lighting in Mezzaine Level", "Light", "nwc1000m_a4", NOT_ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1000m_a5_light", "Shared Lighting in Mezzaine Level", "Light", "nwc1000m_a5", NOT_ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1000m_a6_light", "Shared Lighting in Mezzaine Level", "Light", "nwc1000m_a6", NOT_ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1000m_a7_light", "Shared Lighting in Mezzaine Level", "Light", "nwc1000m_a7", NOT_ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1000m_a8_light", "Shared Lighting in Mezzaine Level", "Light", "nwc1000m_a8", NOT_ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1003B_light", "Lighting in NWC 1003B", "Light", "nwc1003b_a|nwc1003b_b|nwc1003b_c", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc10hallway_light", "Hallway Lights", "Light", "nwc10_hallway", NOT_ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc10elevator_light", "Common Area Lights", "Light", "^nwc10$", NOT_ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc8_light", "8F Common Area Lights", "Light", "^nwc8$", NOT_ACTIONABLE, NO_DUTY_CYCLE)

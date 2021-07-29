@@ -71,6 +71,7 @@ class DBInit(object):
 		addRoom("nwc1003a", "1003A Hall Area", [40.809897, -73.962138], BURKE_LAB, GENERAL_SPACE, NOT_WINDOWED, 0)
 		addRoom("nwc1003b", "1003B Hall Area", [40.809897, -73.962138], TEHERANI_LAB, GENERAL_SPACE, NOT_WINDOWED, 0)
 		addRoom("nwc1001l", "1001L Hall Area", [40.809897, -73.962138], SAJDA_LAB, GENERAL_SPACE, NOT_WINDOWED, 0)
+		addRoom("nwc1003E", "Burke Lab Space", [40.809897, -73.962138], BURKE_LAB, STUDENT_WORK_SPACE, NOT_WINDOWED, 6)
 
 
 		# 10M space units, aisle 1-8
@@ -118,10 +119,13 @@ class DBInit(object):
 		addAppliance("nwc1003g1_vav", "Heating Unit in 1003G", "HVAC", "nwc1003g.*", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc1003t2_vav", "Heating Unit in 1003b", "HVAC", "nwc1003b_a|nwc1003b_b|nwc1003b_t", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc1003o1_vav", "Heating Unit in 1003b", "HVAC", "nwc1003b_c|nwc1003b_danino", ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc1003E", "Heating Unit in 1003E", "HVAC", "nwc1003E", ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwc10MJoe", "Cooling Unit in 1000m_a1", "HVAC", "nwc1000m_a1", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc1008_fcu", "Heating Vent in 1008", "HVAC", "nwc1008", ACTIONABLE, NO_DUTY_CYCLE)
-		addAppliance("nwcM2_fcu", "10F Mezzanine Heating Vent 1", "HVAC", "nwc1000m_a1|nwc1000m_a2|nwc1000m_a3", ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwcM0_fcu", "10F Mezzanine Heating Vent 0", "HVAC", "nwc1000m_a1", ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwcM2_fcu", "10F Mezzanine Heating Vent 1", "HVAC", "nwc1000m_a5|nwc1000m_a6", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwcM3_fcu", "10F Mezzanine Heating Vent 2", "HVAC", "nwc1000m_a4|nwc1000m_a5", ACTIONABLE, NO_DUTY_CYCLE)
-		addAppliance("nwcM1_fcu", "10F Mezzanine Heating Vent 3", "HVAC", "nwc1000m_a6|nwc1000m_a7", ACTIONABLE, NO_DUTY_CYCLE)
+		addAppliance("nwcM1_fcu", "10F Mezzanine Heating Vent 3", "HVAC", "nwc1000m_a1|nwc1000m_a2", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwcM4_fcu", "10F Mezzanine Heating Vent 4", "HVAC", "nwc1000m_a8", ACTIONABLE, NO_DUTY_CYCLE)
 
 		# addAppliance("nwc1003b_fin", "Fin Tube Radiator in 1003B", "HVAC", "nwc1003b.*", ACTIONABLE, NO_DUTY_CYCLE)
@@ -136,6 +140,7 @@ class DBInit(object):
 		addAppliance("nwc1003g_plug1", "Plugmeter in 1003G (Printer&Computer)", "Electrical", "^nwc1003g$", ACTIONABLE, DUTY_CYCLE)
 		addAppliance("nwc1003g_plug2", "Plugmeter in 1003G (Soldering Station)", "Electrical", "^nwc1003g$", ACTIONABLE, DUTY_CYCLE)
 		addAppliance("nwc1003g_plug3", "Plugmeter in 1003G (Projector&XBox)", "Electrical", "^nwc1003g$", ACTIONABLE, DUTY_CYCLE)
+		addAppliance("nwc1003E_light", "Lights in 1003E Lab", "Light", "nwc1003E", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc1003b_light", "Lights in 1003B Lab", "Light", "nwc1003b.*", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc1003g_light", "Lights in 1003G Lab", "Light", "^nwc1003g$", ACTIONABLE, NO_DUTY_CYCLE)
 		addAppliance("nwc1003gA_light", "Lights in 1003G_A Lab", "Light", "nwc1003g_a", ACTIONABLE, NO_DUTY_CYCLE)

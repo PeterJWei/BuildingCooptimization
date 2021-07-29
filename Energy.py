@@ -49,19 +49,23 @@ class SaveLight:
             if Id == "nwc1003g_light":
                 cloudserver.db.ReportEnergyValue(Id, self._powerLimits(300, data["light"], 900), None)
             elif Id == "nwc1000m_a6_light":
-                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(225, data["light"], 1000), None)
+                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(225, data["light"], 1023), None)
             elif Id == "nwc1000m_a1_light":
-                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(225, data["light"], 1000), None)
+                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(225, data["light"], 1023), None)
             elif Id == "nwc1000m_a2_light":
-                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(225, data["light"], 1000), None)
+                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(225, data["light"], 1023), None)
             elif Id == "nwc1000m_a5_light":
-                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(225, data["light"], 1000), None)
+                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(225, data["light"], 1023), None)
             elif Id == "nwc1003gA_light":
-                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(300, data["light"], 1000), None)
+                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(300, data["light"], 1023), None)
             elif Id == "nwc1003gB_light":
-                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(300, data["light"], 1000), None)
-            elif Id == "nwc1008":
-                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(300, data["light"], 1000), None)
+                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(300, data["light"], 1023), None)
+            elif Id == "nwc1008_light":
+                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(300, data["light"], 1023), None)
+            elif Id == "nwc1003E_light":
+                cloudserver.db.ReportEnergyValue(Id, 75*8 + self._powerLimits(600, data["light"], 1023), None)
+            elif Id == "nwc1003B_light":
+                cloudserver.db.ReportEnergyValue(Id, self._powerLimits(600, data["light"], 1023), None)
 
 
 
@@ -78,6 +82,7 @@ class Save:
             return "201 NOT OK"
         if ('raw' not in data):
             cloudserver.db.ReportEnergyValue(Id,data['energy'],None)
+            print(Id + " " + str(data['energy']))
         else:
             cloudserver.db.ReportEnergyValue(Id,data['energy'],data['raw'])
         return "200 OK"

@@ -11,6 +11,9 @@ import sys
 from watchdog import Watchdog
 from Email import SendEmail
 
+from recommenderSystem import recommenderSystem
+
+
 class MongoJsonEncoder(json.JSONEncoder):
 	def default(self, obj):
 		if isinstance(obj, datetime.datetime):
@@ -58,15 +61,19 @@ class DBMgr(object):
 		
 
 	def _ConstructInMemoryGraph(self):
+		self.list_of_PM_values={};
 		self.list_of_temp_values={};
 		self.list_of_light_values={};
 		self.list_of_rooms={};
 		self.list_of_appliances={};
 		self.location_of_users={};
+		self.list_of_users={};
 
 		for room in self.ROOM_DEFINITION:
+			room["PM"]={}
 			room["appliances"]=[]
 			room["users"]=[]
+			room["occupancy"] = 0
 			self.list_of_rooms[room["id"]]=room
 
 		for appliance in self.APPLIANCE_DEFINITION:
@@ -113,6 +120,12 @@ class DBMgr(object):
 				for applianceID in latest_snapshot["data"]:
 					value=latest_snapshot["data"][applianceID]["value"]
 					if value>0:
+						if applianceID == "nwcM3_fcu" or applianceID == "nwcM4_fcu":
+							self.updateApplianceValue(applianceID, 0)
+							continue
+						elif applianceID == "nwc1000m_light":
+							self.updateApplianceValue(applianceID, 0)
+							continue
 						print('Recovered Appliance:',applianceID, value)
 						self.updateApplianceValue(applianceID, value)
 			else:
@@ -161,7 +174,11 @@ class DBMgr(object):
 		self.raw_data=self.dbc.db.raw_data
 		self.snapshots_col_rooms=self.dbc.db.snapshots_col_rooms
 		self.snapshots_col_appliances=self.dbc.db.snapshots_col_appliances
+		self.DRL_recommendations=self.dbc.db.DRL_recommendations
 		self.snapshots_col_users=self.dbc.db.snapshots_col_users
+		self.web_registration = self.dbc.db.web_registration
+		self.web_comfort_feedback = self.dbc.db.web_comfort_feedback
+		self.web_rec_feedback = self.dbc.db.web_rec_feedback
 
 		self.snapshots_parameters=self.dbc.db.snapshots_parameters
 		self._latestSuccessShot=0
@@ -176,18 +193,22 @@ class DBMgr(object):
 		self._ConstructInMemoryGraph()
 		## Construct bipartite graph.
 		# self._accumulator()
-		self._GracefulReloadGraph()
+		#self._GracefulReloadGraph()
 		## Read appliance values from database; TODO: occupants location
-		self._HardcodeValues()
+		#self._HardcodeValues()
 
 		# self.watchdogInit()
 
+		self.recommender = recommenderSystem()
 		if start_bg_thread:
 			self.startDaemon()
 
 		self.snapshots_col_rooms=self.dbc.db.snapshots_col_rooms
 		self.snapshots_col_appliances=self.dbc.db.snapshots_col_appliances
 		self.snapshots_col_users=self.dbc.db.snapshots_col_users
+
+
+
 		## Start the snapshot thread if not running "python DBMgr.py"
 		## (perform self-test if it is.)
 
@@ -198,6 +219,9 @@ class DBMgr(object):
 		t=Thread(target=self._backgroundLoop,args=())
 		t.setDaemon(True)
 		t.start()
+		t_rec = Thread(target=self._backgroundRecommender, args=())
+		t_rec.setDaemon(True)
+		t_rec.start()
 
 	def _now(self):
 		return calendar.timegm(datetime.datetime.utcnow().utctimetuple())
@@ -208,12 +232,80 @@ class DBMgr(object):
 		while True:
 			time.sleep(self.SAMPLING_TIMEOUT_LONGEST)
 			self.SaveShot()
-			self.watchdogCheckUser()
-			self.watchdogCheckAppliance()
+#			self.watchdogCheckUser()
+#			self.watchdogCheckAppliance()
+	def _backgroundRecommender(self):
+		print("Recommender System started...")
+		while True:
+			time.sleep(10)
+			recommendations1, recommendations2, locations = self.recommender._loopRecommendations(self.location_of_users, self.list_of_rooms, self.list_of_appliances)
+			self.save_recommendations(recommendations1, recommendations2, locations)
+			time.sleep(60)
 
+		
+
+	def save_recommendations(self, recommendations1, recommendations2, locations):
+		self.DRL_recommendations.insert({
+			"timestamp":datetime.datetime.utcnow(),
+			"data1":recommendations1,
+			"data2":recommendations2,
+			"locations": locations
+			})
+	
+	def modify_recommendations(self, person, r_type):
+		entry = self.DRL_recommendations.find_one(sort=[("timestamp", pymongo.DESCENDING)])
+		recs1 = entry["data1"]
+		recs2 = entry["data2"]
+		location = entry["locations"]
+		person = self.PID2Name(person)
+		if person in recs1 and person in recs2 and person in location:
+			if r_type == "move":
+				new_recs = []
+				for rec in recs1[person]:
+					print(rec)
+					if rec["t"] != "move":
+						new_recs.append(rec)
+				recs1[person] = new_recs
+				print("New number of recs: " + str(len(recs1[person])))
+		self.DRL_recommendations.insert({
+			"timestamp":datetime.datetime.utcnow(),
+			"data1":recs1,
+			"data2":recs2,
+			"locations": location
+			})
+		
+
+	def get_recommendations(self, person):
+		entry = self.DRL_recommendations.find_one(sort=[("timestamp", pymongo.DESCENDING)])
+		recs1 = entry["data1"]
+		recs2 = entry["data2"]
+		location = entry["locations"]
+		if person in recs1 and person in recs2 and person in location:
+			data = {"recommendations1":recs1[person],
+				"recommendations2":recs2[person],
+				"loc":location[person]}
+			return self._encode(data,True)
+		return None
+		
+	def PID2Name(self, PID):
+		condition = {}
+		entry = self.web_registration.find_one({"PID":PID})
+		if "name" in entry:
+			name = entry["name"]
+		elif "Name" in entry:
+			name = entry["Name"]
+		else:
+			name = "Peter"
+		return name
+		
+			
 	def _getShotRooms(self, concise=True):
 		return self.list_of_rooms
 	def _getShotAppliances(self, concise=True):
+		print("Getting Appliances")
+		for appliance in self.list_of_appliances:
+			print((appliance, self.list_of_appliances[appliance]["value"]))
+			
 		return self.list_of_appliances
 	def _getShotPersonal(self, concise=True):
 		personal_consumption={}
@@ -251,6 +343,34 @@ class DBMgr(object):
 		ret["value"]=total_con
 		return ret
 
+	def calculateLocationEnergyFootprint(self, roomID, encoded=True):
+		ret={
+			"value":0,
+			"HVAC":0,
+			"Light":0,
+			"Electrical":0
+		}
+		if (roomID is None):
+			return ret
+		app_list=self.list_of_rooms[roomID]["appliances"]
+		total_con = 0.0
+		for applianceID in app_list:
+			app = self.list_of_appliances[applianceID]
+			appValue = app["value"]
+			total_con += appValue
+			if (app["type"] == "Electrical"):
+				ret["Electrical"] += appValue
+				continue
+			if (app["type"] == "HVAC"):
+				ret["HVAC"] += appValue
+				continue
+			if (app["type"] == "Light"):
+				ret["Light"] += appValue
+		ret["value"]=total_con
+		if (encoded):
+			return self._encode(ret, False)
+		return ret
+
 	def calculateEnergyFootprint(self, roomID, encoded=True):
 		ret={
 			"value":0,
@@ -265,7 +385,10 @@ class DBMgr(object):
 		print("starting appliances")
 		for applianceID in app_list:
 			app = self.list_of_appliances[applianceID]
-			appValue = app["value"]/(1.0*app["total_users"])
+			if app["total_users"] > 0:
+				appValue = app["value"]/(1.0*app["total_users"])
+			else:
+				appValue = app["value"]
 			total_con += appValue
 			if (app["type"] == "Electrical"):
 				ret["Electrical"] += appValue
@@ -280,19 +403,64 @@ class DBMgr(object):
 			return self._encode(ret, False)
 		return ret
 	
+	def ReportPMValue(self, sensorID, PM1, PM25, PM10):
+		self.list_of_PM_values[sensorID] = [float(PM1), float(PM25), float(PM10)]
+		PM2room = {
+			"nwc10MPeter": ["nwc1000m_a5", "nwc1000m_a6"],
+			"nwc10MJoe": ["nwc1000m_a1", "nwc1000m_a2"],
+			"nwc1003B": ["nwc1003b_a", "nwc1003b_b"],
+			"nwc1003G": ["nwc1003g", "nwc1003g_a", "nwc1003g_c"],
+			"nwc1008_fcu": ["nwc1008"],
+			"nwc1003E": ["nwc1003E"]
+		}
+		if sensorID not in PM2room:
+			print("No spaces assigned to sensor " + sensorID)
+			return
+		for room in PM2room[sensorID]:
+			self.list_of_rooms[room]["PM"]["PM1"] = PM1
+			self.list_of_rooms[room]["PM"]["PM25"] = PM25
+			self.list_of_rooms[room]["PM"]["PM10"] = PM10
 	def ReportTempValue(self, applianceID, T, P, H):
+		Temp2room = {
+			"nwc1003B_parameters": ["nwc1003b_a", "nwc1003b_b"],
+			"nwc1008_parameters": ["nwc1008"],
+			"nwc1000m_a1_parameters": ["nwc1000m_a1"],
+			"nwc1000m_a2_parameters": ["nwc1000m_a2"],
+			"nwc1000m_a5_parameters": ["nwc1000m_a5"],
+			"nwc1000m_a6_parameters": ["nwc1000m_a6"],
+			"nwc1003g_parameters": ["nwc1003g"],
+			"nwc1003gA_parameters": ["nwc1003g_a"],
+			"nwc1003gB_parameters": ["nwc1003g_c"],
+			"nwc1003E_parameters": ["nwc1003E"]
+		}
 		self.list_of_temp_values[applianceID] = [float(T), float(P), float(H)]
+		if applianceID not in Temp2room:
+			print("No spaces assigned to sensor " + applianceID)
+			return
+		for room in Temp2room[applianceID]:
+			self.list_of_rooms[room]["Temperature"] = float(T)
+			self.list_of_rooms[room]["Pressure"] = float(P)
+			self.list_of_rooms[room]["Humidity"] = float(H)
 	def ReportLightValue(self, applianceID, raw_value):
 		self.list_of_light_values[applianceID] = raw_value
 		
 	def ReportEnergyValue(self, applianceID, value, raw_data=None):
 		"maintenance tree node's energy consumption item, and update a sum value"
 		known_room=None
+		defaultValueFilter = {
+			"nwc1003t2_vav": 19231,
+			"nwc1003o1_vav": 1560,
+			"nwc1003gA_vav": 3078,
+			"nwc1003gC_vav": 3079,
+			"nwc1003g1_vav": 537
+		}
 		try:
 			if (applianceID not in self.list_of_appliances):
 				print("applianceID " + applianceID + " not in list of appliances.")
 				return
 			app=self.list_of_appliances[applianceID]
+			if applianceID in defaultValueFilter and int(value) == defaultValueFilter[applianceID]:
+				return
 			known_room=app["rooms"]
 			if value<0:
 				add_log("Negative value found on energy report?",{
@@ -374,6 +542,33 @@ class DBMgr(object):
 				last_seen=None
 			#self.ReportLocationAssociation(userID, "outOfLab", {"Note":"Reported by Watchdog","last_seen": last_seen})
 
+	def ReportUserData(self, person, camera, x, y, loc, temperature):
+		if camera == "thermal5":
+			if person not in ["Peter", "Yanchen"]:
+				person = "Peter"
+			self.list_of_users[person] = {"camera": camera, "x": int(x), "y": int(y), "location": loc, "temp": temperature}
+			self.ReportLocationAssociation(person, loc)
+				
+		if person in ["Joe", "Mark"] and camera != "thermal3":
+			return
+		if person in ["Lei"] and camera != "thermal3" and camera != "thermal2":
+			return
+		if person in ["Abhi", "Ankur"] and camera != "thermal6":
+			return
+		if person in ["Peter", "Yanchen"] and camera != "thermal5" and camera != "thermal1" and camera != "thermal7":
+			return
+		if person in ["Fred"] and camera != "thermal4":
+			return
+		if camera == "thermal4":
+			self.list_of_users["Fred"] = {"camera": camera, "x": int(x), "y": int(y), "temp": temperature}
+			self.ReportLocationAssociation("Fred", "nwc1008")
+			return
+		if person in ["Unknown"]:
+			return
+		self.list_of_users[person] = {"camera": camera, "x": int(x), "y": int(y), "location": loc, "temp": temperature}
+		self.ReportLocationAssociation(person, loc)
+
+
 	def ReportLocationAssociation(self, personID, roomID, raw_data=None):
 		#self.watchdogUserLastSeen()
 		print("Reporting Location for user:")
@@ -401,13 +596,16 @@ class DBMgr(object):
 			# self.recordEvent(personID,"locationChange",roomID)
 
 		self.updateUserLocation(personID, newS, oldS)
+		#print("\n\n\n\n\n\n\n")
+		#print(self.location_of_users)
+		#print("\n\n\n\n\n\n\n")
 
 		if newS!=None:
 			self.list_of_rooms[newS]["phantom_user"]=personID
 			self.list_of_rooms[newS]["phantom_time"] = int(time.mktime(datetime.datetime.now().timetuple()))
 
 		#"people change; should we update now?"
-		self.OptionalSaveShot();
+#		self.OptionalSaveShot();
 
 	def watchdogCheckAppliance(self):
 		notWorking_List=[]
@@ -459,6 +657,63 @@ class DBMgr(object):
 			ret["watchdog_appl"]=self.watchdog.watchdogLastSeen_Appliance
 		return self._encode(ret,True)
 
+	def DashboardRequest(self, PID):
+		ret={
+			"timestamp":self._now()
+		}
+		condition = {
+			"PID": PID
+		}
+		recs = self.web_rec_feedback.find(condition)
+		titles = {}
+		total_energy = 0
+		total_comfort = 0
+		total_aq = 0
+		setpoints = 0
+		moves = 0
+		unknown = 0
+		for rec in recs:
+			title = rec["title"]
+			if title[0] == "C":
+				setpoints += 1
+			elif title[0] == "M":
+				moves += 1
+			else:
+				unknown += 1
+			energy = rec["energy"]
+			energy = int(energy[:-3])
+			total_energy += energy
+			aq = rec["aq"]
+			aq = int(aq[:-1])
+			total_aq += aq
+			comfort = rec["comfort"]
+			comfort = int(comfort[:-1])
+			total_comfort += comfort
+			
+			if title in titles:
+				titles[title] += 1
+			else:
+				titles[title] = 1
+		
+		max_title = ""
+		max_title_count = 0
+		for title in titles:
+			if titles[title] > max_title_count:
+				max_title_count = titles[title]
+				max_title = title
+		ret["max_title"] = max_title
+		ret["max_title_count"] = max_title_count
+		ret["cum_energy"] = total_energy
+		ret["cum_comfort"] = total_comfort
+		ret["cum_aq"] = total_aq
+		ret["setpoints"] = setpoints
+		ret["moves"] = moves
+		ret["unknown"] = unknown
+		return self._encode(ret,True)
+		
+
+
+
 	def ShowRealtimeGraphs(self, single=True, concise=True):
 		ret={
 			"timestamp":self._now()
@@ -502,7 +757,20 @@ class DBMgr(object):
 		ret["watchdog_appl"]=self.watchdog.watchdogLastSeen_Appliance
 
 		return self._encode(ret,True)
-
+	def ShowRealtimePMParameters(self):
+		ret={
+			"timestamp":self._now()
+		}
+		PM1_dict, PM25_dict, PM10_dict = {}, {}, {}
+		for sensorID in self.list_of_PM_values:
+			(PM1, PM25, PM10) = self.list_of_PM_values[sensorID]
+			PM1_dict[sensorID] = PM1
+			PM25_dict[sensorID] = PM25
+			PM10_dict[sensorID] = PM10
+		ret["PM1"] = PM1_dict
+		ret["PM25"] = PM25_dict
+		ret["PM10"] = PM10_dict
+		return self._encode(ret, True)
 	def ShowRealtimeTempParameters(self):
 		ret={
 			"timestamp":self._now()
@@ -543,6 +811,51 @@ class DBMgr(object):
 			ret["energy"][user] = [energy["value"], energy["HVAC"], energy["Light"], energy["Electrical"]]
 		return self._encode(ret,True)
 
+	def ShowRealtimeDashboard(self, locations):
+		ret={
+			"timestamp":self._now()
+		}
+		location_data = {}
+		for location in locations:
+			data = {}
+			PM1 = 10
+			PM25 = 5
+			PM10 = 12.5
+			if "PM" in self.list_of_rooms[location] and "PM1" in self.list_of_rooms[location]["PM"]:
+				PM1 = self.list_of_rooms[location]["PM"]["PM1"]
+				PM25 = self.list_of_rooms[location]["PM"]["PM25"]
+				PM10 = self.list_of_rooms[location]["PM"]["PM10"]
+			if (location not in self.list_of_rooms):
+				print(location + " not found")
+				continue
+			T, P, H = 0, 0, 0
+			if "Temperature" in self.list_of_rooms[location]:
+				T = self.list_of_rooms[location]["Temperature"]
+				P = self.list_of_rooms[location]["Pressure"]
+				H = self.list_of_rooms[location]["Humidity"]
+			energyDict = self.calculateLocationEnergyFootprint(location, encoded=False)
+			if location == "nwc1003b_b":
+				energyDict = self.calculateLocationEnergyFootprint("nwc1003b_c", encoded=False)
+			data["HVAC"] = energyDict["HVAC"]
+			data["Light"] = energyDict["Light"]
+			data["Electrical"] = energyDict["Electrical"]
+			data["PM1"] = PM1
+			data["PM25"] = PM25
+			data["PM10"] = PM10
+			data["Temperature"] = T
+			data["Pressure"] = P
+			data["Humidity"] = H
+			location_data[location] = data
+		if "nwc1000m_a1" in location_data and "nwc1000m_a2" in location_data:
+			location_data["nwc1000m_a1"]["Light"] = location_data["nwc1000m_a2"]["Light"]
+		ret["location_data"] = location_data
+#		users = {"Peter": {"x":125, "y":60, "floor":"10", "temp":94}}
+		users = self.list_of_users
+		print(users)
+		ret["occupants"] = users
+		return self._encode(ret, True)
+		
+
 	def SaveParameters(self, parameters):
 		self.snapshots_parameters.insert({
 			"timestamp":datetime.datetime.utcnow(),
@@ -556,6 +869,7 @@ class DBMgr(object):
 		# obj["_log_timestamp"]=datetime.datetime.utcnow()
 		# self.todayCumulativeEnergy.insert(obj)
 
+		timestamp = datetime.datetime.utcnow()
 		self.snapshots_col_rooms.insert({
 			"timestamp":datetime.datetime.utcnow(),
 			"data":self._getShotRooms()
@@ -579,6 +893,11 @@ class DBMgr(object):
 		if self._latestSuccessShot< self._now() -10 :
 			self.SaveShot();
 
+	def recordOccupancy(self, room, occupancy):
+		if room in self.list_of_rooms:
+			self.list_of_rooms[room]["occupancy"] = occupancy
+		else:
+			print("No room called " + room + " to assign occupancy " + str(occupancy))
 
 	def addLocationSample(self, label, sample):
 		return self.dbc.loc_db.sample_col.insert({
@@ -800,6 +1119,68 @@ class DBMgr(object):
 			return self._encode(json_return, False)
 		else:
 			return json_return
+	
+	def webLogin(self, PID):
+		user = self.web_registration.find_one({"PID":PID})
+		registered = (user is not None)
+		if registered and "name" in user:
+			print("Login: " + user["name"])
+		return registered
+
+	def webSubmitComfort(self, PID, comfort):
+		comfortFeedback = {
+			"timestamp":self._now(),
+			"PID": PID,
+			"comfort": int(comfort)
+		}
+		return self.web_comfort_feedback.insert(comfortFeedback)
+		
+	def SubmitRecommendations(self, PID, recs, location): 
+		one_selected = False
+		two_selected = False
+		for rec in recs:
+			print((rec, rec["list"], rec["title"][0]))
+			print((rec["list"]==1, rec["title"][0]=="M"))
+			if rec["list"] == 1:
+				if rec["title"][0] == "M":
+					self.modify_recommendations(PID, "move")
+				one_selected = True
+			if rec["list"] == 2:
+				two_selected = True
+			recFeedback = {
+				"timestamp":self._now(),
+				"location": location,
+				"PID": PID,
+				"list": rec["list"],
+				"energy": rec["energy"],
+				"comfort": rec["comfort"],
+				"aq": rec["aq"],
+				"global": rec["global"],
+				"title": rec["title"],
+				"desc": rec["desc"],
+				"opt": rec["opt"],
+				"rank": rec["rank"]
+			}
+			self.web_rec_feedback.insert(recFeedback)
+		if not one_selected:
+			recFeedback = {
+				"location": location,
+				"timestamp": self._now(),
+				"PID": PID,
+				"list": 1,
+				"rank": -1
+			}
+			self.web_rec_feedback.insert(recFeedback)
+		if not two_selected:
+			recFeedback = {
+				"location": location,
+				"timestamp": self._now(),
+				"PID": PID,
+				"list": 2,
+				"rank": -1
+			}
+			self.web_rec_feedback.insert(recFeedback)
+		return True
 
 	def labInt(self, x):
 		return {

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body onload="notifyMe()">
+<script type="text/javascript">
+function notifyMe() {
+    if (!window.Notification) {
+        console.log('Browser does not support notifications.');
+    } else {
+        // check if permission is already granted
+        if (Notification.permission === 'granted') {
+            // show notification here
+            var notify = new Notification('Hi there!', {
+                body: 'How are you doing?',
+                icon: 'https://bit.ly/2DYqRrh',
+            });
+        } else {
+	    console.log("Requesting Permission");
+            // request permission from user
+            Notification.requestPermission().then(function (p) {
+                console.log("Requesting");
+                if (p === 'granted') {
+                    // show notification here
+                    var notify = new Notification('Hi there!', {
+                        body: 'How are you doing?',
+                        icon: 'https://bit.ly/2DYqRrh',
+                    });
+                } else {
+                    console.log('User blocked notifications.');
+                }
+            }).catch(function (err) {
+                console.error(err);
+            });
+        }
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Recommendations- Dashboard</title>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/zepto/1.1.6/zepto.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/zepto/1.1.6/modules/fx.min.js"></script>
+  
+  <!-- Custom fonts for this template-->
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="css/sb-admin-2.min.css" rel="stylesheet">
+
+</head>
+
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+      <!-- Sidebar - Brand -->
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="action.html">
+        <div class="sidebar-brand-text mx-3">Building Co-Optimization</div>
+      </a>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider my-0">
+
+      <!-- Nav Item - Dashboard -->
+      <li class="nav-item active">
+        <a class="nav-link" href="index.html">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Comfort Feedback</span></a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="action.html">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Recommendations</span></a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="dashboard.html">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Dashboard</span></a>
+      </li>
+
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+      
+
+      <!-- Sidebar Toggler (Sidebar) -->
+      <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+      </div>
+
+    </ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+          <!-- Sidebar Toggle (Topbar) -->
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+
+          <!-- Topbar Search -->
+          <a href="http://icsl.ee.columbia.edu">
+            <img height="50" src="ICSL_Logo.png">
+          </a>
+          <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+            <div class="input-group">
+              <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+              <div class="input-group-append">
+                <button class="btn btn-primary" type="button">
+                  <i class="fas fa-search fa-sm"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Topbar Navbar -->
+          <ul class="navbar-nav ml-auto">
+
+            <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+            <li class="nav-item dropdown no-arrow d-sm-none">
+              <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-search fa-fw"></i>
+              </a>
+              <!-- Dropdown - Messages -->
+              <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
+                <form class="form-inline mr-auto w-100 navbar-search">
+                  <div class="input-group">
+                    <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                      <button class="btn btn-primary" type="button">
+                        <i class="fas fa-search fa-sm"></i>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </li>
+
+            <!-- Nav Item - Alerts -->
+            <li class="nav-item dropdown no-arrow mx-1">
+              <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell fa-fw"></i>
+                <!-- Counter - Alerts -->
+                <span class="badge badge-danger badge-counter">0</span>
+              </a>
+              <!-- Dropdown - Alerts -->
+              <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                <h6 class="dropdown-header">
+                  Alerts Center
+                </h6>
+                <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
+              </div>
+            </li>
+
+            <!-- Nav Item - Messages -->
+            <li class="nav-item dropdown no-arrow mx-1">
+              <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-envelope fa-fw"></i>
+                <!-- Counter - Messages -->
+                <span class="badge badge-danger badge-counter">0</span>
+              </a>
+              <!-- Dropdown - Messages -->
+              <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+                <h6 class="dropdown-header">
+                  Message Center
+                </h6>
+                <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
+              </div>
+            </li>
+
+            <div class="topbar-divider d-none d-sm-block"></div>
+
+            <!-- Nav Item - User Information -->
+            <li class="nav-item dropdown no-arrow">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span id="ParticipantID" class="mr-2 d-none d-lg-inline text-gray-600 small">Fred Jiang</span>
+              </a>
+              <!-- Dropdown - User Information -->
+              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                <a class="dropdown-item" href="#">
+                  <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Profile
+                </a>
+                <a class="dropdown-item" href="#">
+                  <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Settings
+                </a>
+                <a class="dropdown-item" href="#">
+                  <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Activity Log
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                  <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Logout
+                </a>
+              </div>
+            </li>
+
+          </ul>
+
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <!-- Page Heading -->
+              <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Recommendations</h1>
+		<button type="button" data-toggle="modal" class="d-none d-sm-inline-block btn btn-sm btn-primary" data-target="#instructionsModal">Instructions</button>
+              </div>
+          <div class="row">
+            <div class="col-xs-8 col-md-8">
+	    <h4 id="loc">Current Location:</h5>
+	    </div>
+	  </div>
+	  <div class="row">
+	    <div class="col-xs-6 col-md-6">
+	      <h5 style="color:red;">Not your location?</h5>
+<!--	    </div>
+	    <div class="col-xs-6 col-md-6">-->
+	      <div class="dropdown">
+	        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select your location</button>
+   	        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1000m_a1'); return false;">NWC 10M Aisle 1 (Joe/Mark)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1000m_a2'); return false;">NWC 10M Aisle 2 (Lei)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1000m_a5'); return false;">NWC 10M Aisle 5 (Teherani)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1000m_a6'); return false;">NWC 10M Aisle 6 (ICSL)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1003b_b'); return false;">NWC 1003B Lab Space B (Yanchen/Hengjiu)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1003b_a'); return false;">NWC 1003B Lab Space A (Peter)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1008'); return false;">NWC 1008 (Professor Jiang's Office)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1003g'); return false;">NWC 1003G Laser Lab Space A (ICSL)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1000g_a'); return false;">NWC 1003G Laser Lab Space B (TitanX)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1000g_c'); return false;">NWC 1003G Laser Lab Space C (Hone/Schuck Lab)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('nwc1003E'); return false;">NWC 1003E (Burke Lab Space)</a>
+	          <a class="dropdown-item" href="#" onclick="SendLocation('outOfLab'); return false;">Out Of Lab</a>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	  </br>
+          <div class="row">
+            <div class="col-xs-6 col-md-6">
+              <h2>List A</h2>
+              <div id="list1" class="list-group">
+<!--                 <a href="#" class="list-group-item list-group-item-action" data-toggle="popover" data-trigger="focus" data-content="Placeholder"><div class="d-flex w-100 justify-content-between"> -->
+                <!--<a href="#" class="list-group-item list-group-item-action">
+                  <div class="row bg-dark">
+                    <div class="col-xs-6 col-md-6 col-lg-6">
+                    <h5 class="mb-1">List group item heading</h5>
+                  </div>
+                    <div class="col-xs-6 col-md-6 col-lg-6">
+                    <img src="001-man-walking.png" width="50">
+                  </div>
+                  </div>
+
+                  <div class="row bg-primary">
+                    <div class="col-xs-12 col-md-12 col-lg-12">
+                    <small class="text-muted">3 days ago</small>
+                  </div>
+                  </div>
+                </a>-->
+              </div>
+            </div>
+            <div class="col-xs-6 col-md-6">
+              <h2>List B</h2>
+              <div id="list2" class="list-group">
+<!--                <a href="#" class="list-group-item list-group-item-action"><div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">List group item heading</h5>
+                <small class="text-muted">3 days ago</small>
+                </div></a>
+                <a href="#" class="list-group-item list-group-item-action"><div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">List group item heading</h5>
+                <small class="text-muted">3 days ago</small>
+                </div></a>-->
+              </div>
+            </div>
+          </div>
+	  </br>
+	    <button id="submit" type="button" data-toggle="modal" data-target="#ThanksModal" onclick="SubmitFeedback();" class="d-none d-sm-inline-block btn btn-lg btn-primary"><i class="fas fa-download fa-s text-white-50"></i>Submit </button>
+	  </br>
+        </div>
+	</br>
+
+
+      </div>
+    </div>
+  </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright &copy;  Intelligent and Connected Systems Laboratory 2021</span>
+          </div>
+        </div>
+      </footer>
+      <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+  </div>
+  <!-- End of Page Wrapper -->
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Logout Modal-->
+  <div class="modal fade" id="instructionsModal" tabindex="-2" role="dialog" aria-labelledby="instructionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Recommendation Instructions</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">x</span>
+          </button>
+        </div>
+        <div class="modal-body">Select a recommendation from each list. Your selection should be based on the recommendation you would be most likely to perform, given the difficulty of the action and the benefits (and costs) of the actions. To submit feedback, click the Submit button at the bottom of the page. You can also choose to not select any actions from the list (if none of the actions are worthwhile). If that is the case, please still click the Submit button so we can record your feedback.
+        </div>
+        <div class="modal-footer">
+	  <button class="btn btn-secondary" type="button" data-dismiss="modal"> Close </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+          <a class="btn btn-primary" href="login.html" onclick="localStorage.removeItem('participantID');">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="ThanksModal" tabindex="-3" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Thanks for your Feedback!</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin-2.min.js"></script>
+
+  <!-- Page level plugins -->
+  <script src="vendor/chart.js/Chart.min.js"></script>
+  <script type="text/javascript">
+    if (localStorage.getItem("participantID") === null) {
+      window.location.href = "login.html";
+    }
+    var PID = JSON.parse(localStorage.getItem("participantID"))["PID"];
+    var PData = {
+        "PID": PID
+    };
+    var json_data = JSON.stringify(PData);
+    $.post('/api/appSupport/webLogin/', json_data,
+        function(payload){
+          console.log('Received data', payload);
+          if (!payload.success) {
+            window.location.href = "login.html";
+          }
+        }, 'json');
+    var PID = JSON.parse(localStorage.getItem("participantID"))["PID"];
+    console.log(PID);
+    document.getElementById("ParticipantID").innerHTML = "Participant " + PID;
+  </script>
+
+  <script type="text/javascript">
+    var comfortDictionary = {
+	"-3": "I feel Very Cold",
+	"-2": "I feel Cold",
+	"-1": "I feel Cool",
+	"0": "I feel Neutral",
+	"1": "I feel Warm",
+	"2": "I feel Hot",
+	"3": "I feel Very Hot"
+    };
+    var ComfortVar = 0;
+    function SelectComfort(C) {
+      document.getElementById("SelectedComfort").innerHTML = "Perceived Comfort: " + C + " (" + comfortDictionary[C] + ")";
+      ComfortVar = C;
+    }
+  </script>
+  <script type="text/javascript">
+    $(function () {
+      $('[data-toggle="popover"]').popover()
+    })
+    $('.popover-dismiss').popover({
+      trigger: 'focus'
+    })
+
+    function enablePopovers() {
+      $('[data-toggle="popover"]').popover();
+      $('.popover-dismiss').popover({
+        trigger: 'focus'
+      });
+    }
+  </script>
+  <script type="text/javascript">
+    var selected = {};
+    var global_recs = [];
+    var global_location = "";
+    setTimeout(function() {getRecommendations();}, 1000);
+    setInterval(function() {getRecommendations();console.log("Running get recommendations");}, 1000*60);
+    function getRecommendations() {
+      selected = {};
+      global_recs = [];
+      var PID = JSON.parse(localStorage.getItem("participantID"))["PID"];
+      $.post('/api/Recommendations/' + PID,
+        {},
+        function(payload) {
+	  console.log('Recs', payload);
+          if (!payload.recommendations1) {
+            console.log(payload);
+            alert('error, no data!');
+          }
+	  var loc = "Out of Lab";
+	  if (!payload.loc) {
+	    console.log("No location!");
+	  } else {
+	    loc = payload.loc;
+	    global_location = payload.loc;
+	  }
+  	  document.getElementById("loc").innerHTML = "Current Location: " + loc;
+	  
+          var data1 = [];
+          var data2 = [];
+          Object.keys(payload.recommendations1).sort().map(function(rank) {
+	    var im = "";
+	    if (payload.recommendations1[rank].t == 'move') {
+	      im = "002-walking.png";} else {
+	      im = "001-thermostat.png";}	
+            var energy = payload.recommendations1[rank].energy;
+	    var energy_f = parseFloat(energy);
+	    var energy_s = Math.round(energy_f).toString() + " Wh";
+	    var energy_html = '<i class="fas fa-arrow-up" style="color:green"></i>'
+	    if (energy_f < 0) {
+	      energy_html = '<i class="fas fa-arrow-down" style="color:red"></i>'
+	    }
+	    var comfort = payload.recommendations1[rank].comfort;
+	    var comfort_f = parseFloat(comfort);
+	    var comfort_s = Math.round(comfort_f).toString() + "%";
+	    var comfort_html = '<i class="fas fa-arrow-up" style="color:green"></i>'
+	    if (comfort_f < 0) {
+	      comfort_html = '<i class="fas fa-arrow-down" style="color:red"></i>'
+	    }
+	    var air_quality= payload.recommendations1[rank].aq;
+	    var aq_f = parseFloat(air_quality);
+	    var aq_s = Math.round(aq_f).toString() + "%";
+	    var aq_html = '<i class="fas fa-arrow-up" style="color:green"></i>'
+	    if (aq_f < 0) {
+	      aq_html = '<i class="fas fa-arrow-down" style="color:red"></i>'
+	    }
+	    var rec = {
+	      'list':1,
+	      'energy_html':energy_html,
+	      'comfort_html':comfort_html,
+	      'aq_html':aq_html,
+	      'im': im,
+              'rank': rank,
+              'title': payload.recommendations1[rank].title,
+              'desc': payload.recommendations1[rank].desc,
+	      'opt': payload.recommendations1[rank].opt,
+              'energy': energy_s,
+              'comfort': comfort_s,
+              'aq': aq_s
+//              'reward': payload.recommendations1[rank].reward
+	    }
+	    if (rank <= 4) {
+            data1.push(rec);
+	    global_recs.push(rec);
+	    }
+          });
+          Object.keys(payload.recommendations2).sort().map(function(rank) {
+	    var im = "";
+	    if (payload.recommendations2[rank].t == 'move') {
+	      im = "002-walking.png";} else {
+	      im = "001-thermostat.png";}	
+            var energy = payload.recommendations2[rank].energy;
+	    var energy_f = parseFloat(energy);
+	    var energy_s = Math.round(energy_f).toString() + " Wh";
+	    var energy_html = '<i class="fas fa-arrow-up" style="color:green"></i>'
+	    if (energy_f < 0) {
+	      energy_html = '<i class="fas fa-arrow-down" style="color:red"></i>'
+	    }
+	    var comfort = payload.recommendations2[rank].comfort;
+	    var comfort_f = parseFloat(comfort);
+	    var comfort_s = Math.round(comfort_f).toString() + "%";
+	    var comfort_html = '<i class="fas fa-arrow-up" style="color:green"></i>'
+	    if (comfort_f < 0) {
+	      comfort_html = '<i class="fas fa-arrow-down" style="color:red"></i>'
+	    }
+	    var air_quality= payload.recommendations2[rank].aq;
+	    var aq_f = parseFloat(air_quality);
+	    var aq_s = Math.round(aq_f).toString() + "%";
+	    var aq_html = '<i class="fas fa-arrow-up" style="color:green"></i>'
+	    if (aq_f < 0) {
+	      aq_html = '<i class="fas fa-arrow-down" style="color:red"></i>'
+	    }
+	    var rec = {
+	      'list':2,
+	      'energy_html':energy_html,
+	      'comfort_html':comfort_html,
+	      'aq_html':aq_html,
+	      'im': im,
+              'rank': rank,
+              'title': payload.recommendations2[rank].title,
+              'desc': payload.recommendations2[rank].desc,
+	      'opt': payload.recommendations2[rank].opt,
+              'energy': energy_s,
+              'comfort': comfort_s,
+              'aq': aq_s
+//              'reward': payload.recommendations1[rank].reward
+	    }
+            data2.push(rec);
+	    global_recs.push(rec);
+          });
+	  data2.reverse();
+	  data1.reverse();
+          var rec_html=data1.map(function(item) {
+            return ('<a id="rec%rank" onclick="changeColor(this,%rank,1);" href="#" class="list-group-item list-group-item-action">' +
+              '<div class="row"><div class="col-xs-10 col-md-10 col-lg-10">' +
+	      '<div class="row">' +
+              '<h5 class="mb-1">%Title</h5>' +
+              '</div><div class="row">' +
+              '<small class="text-muted">%Desc</small>' + 
+              '</div><div class="row">' +
+              '<small class="text-muted">Energy %Energy</small>%EnergyHTML' +
+              '</div><div class="row">' +
+	      '<small class="text-muted">Comfort %Comfort</small>%ComfortHTML' +
+              '</div><div class="row">' +
+	      '<small class="text-muted">Air Quality %AQ</small>%AQHTML' +
+	      '</div>' +
+              '</div><div class="col-xs-2 col-md-2 col-lg-2">' +
+              '<img src="%Image" width="65"></div>' +
+              '</div></a>'
+            ).replace('%rank', item.rank).replace('%rank', item.rank).replace('%Title', item.title).replace('%Desc', item.desc).replace('%Energy', item.energy).replace('%Comfort', item.comfort).replace('%AQ', item.aq).replace('%Image', item.im).replace('%EnergyHTML', item.energy_html).replace('%ComfortHTML', item.comfort_html).replace('%AQHTML', item.aq_html);
+          }).join('');
+          $('#list1').html(rec_html);
+          var rec_html2=data2.map(function(item) {
+            return ('<a id="recc%rank" onclick="changeColor(this,%rank,2);" href="#" class="list-group-item list-group-item-action">' +
+              '<div class="row"><div class="col-xs-10 col-md-10 col-lg-10">' +
+	      '<div class="row">' +
+              '<h5 class="mb-1">%Title</h5>' +
+              '</div><div class="row">' +
+              '<small class="text-muted">%Desc</small>' +
+              '</div><div class="row">' +
+              '<small class="text-muted">Energy %Energy</small>%EnergyHTML' +
+              '</div><div class="row">' +
+	      '<small class="text-muted">Comfort %Comfort</small>%ComfortHTML' +
+              '</div><div class="row">' +
+	      '<small class="text-muted">Air Quality %AQ</small>%AQHTML' +
+	      '</div>' +
+              '</div><div class="col-xs-2 col-md-2 col-lg-2">' +
+              '<img src="%Image" width="65"></div>' +
+              '</div></a>'
+            ).replace('%rank', item.rank).replace('%rank', item.rank).replace('%Title', item.title).replace('%Desc', item.desc).replace('%Energy', item.energy).replace('%Comfort', item.comfort).replace('%AQ', item.aq).replace('%Image', item.im).replace('%EnergyHTML', item.energy_html).replace('%ComfortHTML', item.comfort_html).replace('%AQHTML', item.aq_html);
+	  }).join('');
+	  $('#list2').html(rec_html2);
+        }, 'json'
+      );
+    }
+  </script>
+
+  <script type="text/javascript">
+    function changeElementColor(rank, listNum) {
+	var element = null;
+	if (listNum == 1) {
+		element = document.getElementById("rec" + rank);
+	}
+	if (listNum == 2) {
+		element = document.getElementById("recc" + rank);
+	}
+	var currentColor = element.style.backgroundColor;
+	if (currentColor == 'rgb(255, 187, 187)') {
+		element.style.backgroundColor = '#FFFFFF';	
+		var order = (listNum-1)*5 + rank;
+		selected[order] = false;
+	} else {
+		element.style.backgroundColor = '#FFBBBB';
+		var order = (listNum-1)*5 + rank;
+		selected[order] = true;
+	}
+    }
+
+    function changeColor(element, rank, listNum) {
+	//document.getElementById("rec"+id).style.color = '#888888';
+	
+	var currentColor = element.style.backgroundColor;
+	console.log("Current Color: ", currentColor);
+	console.log("List Number: ", listNum);
+	console.log("Rank: ", rank);
+
+	for (var i=0; i < 5; i++) {
+		if (i == rank) {
+			continue;
+		}
+		var otherElem = null;
+		if (listNum == 1) {
+			otherElem = document.getElementById("rec" + i);
+		}
+		if (listNum == 2) {
+			otherElem = document.getElementById("recc" + i);
+		}
+		otherElem.style.backgroundColor = '#FFFFFF';
+		var order = (listNum-1)*5 + i;
+		selected[order] = false;
+	}
+	
+	if (currentColor == 'rgb(255, 187, 187)') {
+		element.style.backgroundColor = '#FFFFFF';	
+		var order = (listNum-1)*5 + rank;
+		selected[order] = false;
+	        console.log("Order: ", order);
+	} else {
+		element.style.backgroundColor = '#FFBBBB';
+		var order = (listNum-1)*5 + rank;
+		selected[order] = true;
+	        console.log("Order: ", order);
+	}
+    }
+  </script>
+
+  <script type="text/javascript">
+    function SendLocation(loc) {
+      console.log("Sending Location: ", loc);
+      var data = {
+        "Location": loc,
+        "PID": PID,
+      };
+      var json_data = JSON.stringify(data);
+      console.log("JSON", json_data);
+      $.post('/api/appSupport/SubmitLocation/', json_data,
+        function(payload){
+          console.log('Received data', payload);
+          if (!payload.success) {alert(payload.error);}
+        }, 'json');
+    }
+  </script>
+
+  <script type="text/javascript">
+    function SubmitFeedback() {
+      var PID = JSON.parse(localStorage.getItem("participantID"))["PID"];
+      console.log("Submit Feedback", "Button Clicked!");
+      var send_recs = [];
+      for (var i=0; i<10; i++) {
+	if (i in selected) {
+	  if (selected[i]) {
+	    console.log("selected: ", global_recs[i]);
+	    changeElementColor(i%5, Math.floor(i/5) + 1);
+	    global_recs[i]["global"] = i;
+	    send_recs.push(global_recs[i]);
+	  }
+        }
+      }
+      var data = {
+        "Recs": send_recs,
+        "PID": PID,
+	"Location": global_location
+      };
+      var json_data = JSON.stringify(data);
+      console.log("JSON", json_data);
+      $.post('/api/appSupport/recsSubmit/', json_data,
+        function(payload){
+          console.log('Received data', payload);
+          if (!payload.success) {alert(payload.error);}
+        }, 'json');
+      getRecommendations();
+
+    }
+    function SubmitFeedback2() {
+      var PID = JSON.parse(localStorage.getItem("participantID"))["PID"];
+      console.log(ComfortVar);
+      var PData = {
+        "PID": PID,
+        "Comfort": ComfortVar
+      };
+      var json_data = JSON.stringify(PData);
+      console.log(json_data);
+      $.post('/api/appSupport/webSubmit/', json_data,
+        function(payload){
+          console.log('Received data', payload);
+          if (!payload.success) {alert(payload.error);}
+        }, 'json');
+	document.getElementById("modalText").innerHTML = "Thanks for your feedback!<br />Comfort Level: " + ComfortVar + " (" + comfortDictionary[ComfortVar] + ")";
+	$('#exampleModal').modal({
+	  keyboard: false
+	})
+    }
+  </script>
+</body>
+
+</html>
